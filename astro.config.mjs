@@ -44,7 +44,7 @@ export default defineConfig({
 			containers: ["main", "#toc"],
 			smoothScrolling: true,
 			cache: true,
-			preload: true,
+			preload: false,
 			accessibility: true,
 			updateHead: true,
 			updateBodyClass: false,
@@ -170,6 +170,17 @@ export default defineConfig({
 					warn(warning);
 				},
 			},
+			minify: 'terser',
+			terserOptions: {
+				compress: {
+					drop_console: true,
+				},
+			},
+			chunkSizeWarningLimit: 1000,
 		},
+	},
+	image: {
+		optimize: true,
+		quality: 80,
 	},
 });

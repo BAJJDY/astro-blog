@@ -30,7 +30,7 @@ export const siteConfig: SiteConfig = {
 	},
 	favicon: [
 		{
-			src: '/favicon/favicon.ico',    // Path of the favicon, relative to the /public directory
+			src: "/favicon/favicon.ico", // Path of the favicon, relative to the /public directory
 		},
 	],
 };
@@ -53,7 +53,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "/12.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/' 
+	avatar: "/12.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 	name: "BAJJDY",
 	bio: "热爱技术与分享的开发者",
 	links: [

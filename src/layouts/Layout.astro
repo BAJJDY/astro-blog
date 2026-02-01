@@ -226,10 +226,8 @@ import { siteConfig } from '../config';
 // 	}
 // })();
 
-/* TODO This is a temporary solution for style flicker issue when the transition is activated */
+/* Temporary solution for style flicker issue when the transition is activated */
 /* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
-/* update: fixed in Astro 3.2.4 */
-/*
 function disableAnimation() {
 	const css = document.createElement('style')
 	css.appendChild(
@@ -255,7 +253,9 @@ function disableAnimation() {
 		}, 1)
 	}
 }
-*/
+
+// Call the function to disable animation temporarily during initial load
+disableAnimation();
 
 const bannerEnabled = !!document.getElementById('banner-wrapper')
 

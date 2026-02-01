@@ -7,55 +7,79 @@ import {
 import { expressiveCodeConfig } from "@/config";
 import type { LIGHT_DARK_MODE } from "@/types/config";
 
+// Check if we're in a browser environment
+export function isBrowser(): boolean {
+	return typeof window !== "undefined" && typeof localStorage !== "undefined" && typeof document !== "undefined";
+}
+
 export function getDefaultHue(): number {
 	const fallback = "250";
-	const configCarrier = document.getElementById("config-carrier");
-	return Number.parseInt(configCarrier?.dataset.hue || fallback, 10);
+	if (isBrowser()) {
+		const configCarrier = document.getElementById("config-carrier");
+		return Number.parseInt(configCarrier?.dataset.hue || fallback, 10);
+	}
+	return Number.parseInt(fallback, 10);
 }
 
 export function getHue(): number {
-	const stored = localStorage.getItem("hue");
-	return stored ? Number.parseInt(stored, 10) : getDefaultHue();
+	if (isBrowser()) {
+		const stored = localStorage.getItem("hue");
+		if (stored) {
+			return Number.parseInt(stored, 10);
+		}
+	}
+	return getDefaultHue();
 }
 
 export function setHue(hue: number): void {
-	localStorage.setItem("hue", String(hue));
-	const r = document.querySelector(":root") as HTMLElement;
-	if (!r) {
-		return;
+	if (isBrowser()) {
+		localStorage.setItem("hue", String(hue));
+		const r = document.querySelector(":root") as HTMLElement;
+		if (r) {
+			r.style.setProperty("--hue", String(hue));
+		}
 	}
-	r.style.setProperty("--hue", String(hue));
 }
 
 export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
-	switch (theme) {
-		case LIGHT_MODE:
-			document.documentElement.classList.remove("dark");
-			break;
-		case DARK_MODE:
-			document.documentElement.classList.add("dark");
-			break;
-		case AUTO_MODE:
-			if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-				document.documentElement.classList.add("dark");
-			} else {
+	if (isBrowser()) {
+		switch (theme) {
+			case LIGHT_MODE:
 				document.documentElement.classList.remove("dark");
-			}
-			break;
-	}
+				break;
+			case DARK_MODE:
+				document.documentElement.classList.add("dark");
+				break;
+			case AUTO_MODE:
+				if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+					document.documentElement.classList.add("dark");
+				} else {
+					document.documentElement.classList.remove("dark");
+				}
+				break;
+		}
 
-	// Set the theme for Expressive Code
-	document.documentElement.setAttribute(
-		"data-theme",
-		expressiveCodeConfig.theme,
-	);
+		// Set the theme for Expressive Code
+		document.documentElement.setAttribute(
+			"data-theme",
+			expressiveCodeConfig.theme,
+		);
+	}
 }
 
 export function setTheme(theme: LIGHT_DARK_MODE): void {
-	localStorage.setItem("theme", theme);
-	applyThemeToDocument(theme);
+	if (isBrowser()) {
+		localStorage.setItem("theme", theme);
+		applyThemeToDocument(theme);
+	}
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {
-	return (localStorage.getItem("theme") as LIGHT_DARK_MODE) || DEFAULT_THEME;
+	if (isBrowser()) {
+		const stored = localStorage.getItem("theme") as LIGHT_DARK_MODE;
+		if (stored) {
+			return stored;
+		}
+	}
+	return DEFAULT_THEME;
 }

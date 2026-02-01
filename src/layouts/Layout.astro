@@ -226,36 +226,36 @@ import { siteConfig } from '../config';
 // 	}
 // })();
 
-/* Temporary solution for style flicker issue when the transition is activated */
-/* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
-function disableAnimation() {
-	const css = document.createElement('style')
-	css.appendChild(
-		document.createTextNode(
-			`*{
-              -webkit-transition:none!important;
-              -moz-transition:none!important;
-              -o-transition:none!important;
-              -ms-transition:none!important;
-              transition:none!important
-              }`
-		)
-	)
-	document.head.appendChild(css)
+/* Theme transition optimization */
+function optimizeThemeTransition() {
+	// Add a temporary overlay to smooth theme transitions
+	const overlay = document.createElement('div');
+	overlay.style.position = 'fixed';
+	overlay.style.top = '0';
+	overlay.style.left = '0';
+	overlay.style.width = '100%';
+	overlay.style.height = '100%';
+	overlay.style.background = 'currentColor';
+	overlay.style.zIndex = '9999';
+	overlay.style.pointerEvents = 'none';
+	overlay.style.transition = 'opacity 0.2s ease-in-out';
+	overlay.style.opacity = '0';
+	document.body.appendChild(overlay);
 
-	return () => {
-		// Force restyle
-		;(() => window.getComputedStyle(document.body))()
+	// Force repaint
+	void overlay.offsetWidth;
 
-		// Wait for next tick before removing
+	// Remove overlay after a short delay
+	setTimeout(() => {
+		overlay.style.opacity = '0';
 		setTimeout(() => {
-			document.head.removeChild(css)
-		}, 1)
-	}
+			document.body.removeChild(overlay);
+		}, 200);
+	}, 10);
 }
 
-// Call the function to disable animation temporarily during initial load
-disableAnimation();
+// Call the function to optimize theme transitions
+optimizeThemeTransition();
 
 const bannerEnabled = !!document.getElementById('banner-wrapper')
 
@@ -301,10 +301,10 @@ function initCustomScrollbar() {
 		}, {
 		scrollbars: {
 			theme: 'scrollbar-base scrollbar-auto py-1',
-			autoHide: 'move',
-			autoHideDelay: 500,
-			autoHideSuspend: false,
+			visibility: 'hidden',
+			autoHide: 'never',
 		},
+		sizeAutoCapable: true,
 	});
 
 	const katexElements = document.querySelectorAll('.katex-display') as NodeListOf<HTMLElement>;

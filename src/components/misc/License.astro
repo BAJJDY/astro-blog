@@ -16,8 +16,8 @@ const { title, pubDate, slug } = Astro.props;
 const className = Astro.props.class;
 const profileConf = profileConfig;
 const licenseConf = licenseConfig;
-// Use Astro.site to get the correct domain from configuration
-const postUrl = new URL(`/posts/${slug}/`, Astro.site).toString();
+// Use fixed domain instead of Astro.site to ensure correct URL is displayed
+const postUrl = `https://blog.bajjdy.cc.cd/posts/${slug}/`;
 ---
 <div class={`relative transition overflow-hidden bg-[var(--license-block-bg)] py-5 px-6 ${className}`}>
     <div class="transition font-bold text-black/75 dark:text-white/75">

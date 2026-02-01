@@ -25,6 +25,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 
 // https://astro.build/config
+// Use environment variable for production, otherwise use localhost for development
 const site = process.env.SITE_URL || "http://localhost:4321/";
 
 export default defineConfig({

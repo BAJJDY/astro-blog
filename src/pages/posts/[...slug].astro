@@ -108,6 +108,14 @@ const jsonLd = {
 
             {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
 
+            <!-- GitHub Edit Link -->
+            <div class="mb-6 onload-animation">
+                <a href={`https://github.com/bajjdy/astro-blog/edit/main/src/content/posts/${entry.id}`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-5 py-3 rounded-lg bg-[var(--card-bg)] hover:bg-[var(--btn-card-bg-hover)] active:bg-[var(--btn-card-bg-active)] transition-all duration-300 group">
+                    <Icon name="fa6-brands:github" class="text-[1rem] mr-2 text-[var(--primary)]" />
+                    <span class="text-sm font-medium">编辑本文</span>
+                </a>
+            </div>
+
         </div>
     </div>
 

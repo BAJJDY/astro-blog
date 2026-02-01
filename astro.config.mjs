@@ -25,8 +25,10 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 
 // https://astro.build/config
+const site = process.env.SITE_URL || "http://localhost:4321/";
+
 export default defineConfig({
-	site: "https://fuwari.vercel.app/",
+	site: site,
 	base: "/",
 	trailingSlash: "always",
 	devToolbar: {

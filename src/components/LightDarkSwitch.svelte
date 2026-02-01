@@ -1,6 +1,10 @@
 <script lang="ts">
 import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants.ts";
-import { applyThemeToDocument, getStoredTheme, setTheme } from "@utils/setting-utils.ts";
+import {
+	applyThemeToDocument,
+	getStoredTheme,
+	setTheme,
+} from "@utils/setting-utils.ts";
 import { onMount } from "svelte";
 import type { LIGHT_DARK_MODE } from "@/types/config.ts";
 

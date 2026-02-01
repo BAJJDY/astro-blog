@@ -9,7 +9,11 @@ import type { LIGHT_DARK_MODE } from "@/types/config";
 
 // Check if we're in a browser environment
 export function isBrowser(): boolean {
-	return typeof window !== "undefined" && typeof localStorage !== "undefined" && typeof document !== "undefined";
+	return (
+		typeof window !== "undefined" &&
+		typeof localStorage !== "undefined" &&
+		typeof document !== "undefined"
+	);
 }
 
 export function getDefaultHue(): number {

@@ -564,7 +564,7 @@ function createPhotoSwipe() {
 	lightbox.init()
 }
 
-const setup = () => {
+const setupLightbox = () => {
 	if (!lightbox) {
 		createPhotoSwipe()
 	}
@@ -583,7 +583,9 @@ const setup = () => {
 
 if (window.swup) {
 	setup()
+	setupLightbox()
 } else {
 	document.addEventListener("swup:enable", setup)
+	document.addEventListener("swup:enable", setupLightbox)
 }
 </script>

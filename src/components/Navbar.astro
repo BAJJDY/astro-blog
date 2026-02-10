@@ -5,7 +5,6 @@ import { LinkPresets } from "../constants/link-presets";
 import { LinkPreset, type NavBarLink } from "../types/config";
 import { url } from "../utils/url-utils";
 import LightDarkSwitch from "./LightDarkSwitch.svelte";
-import Search from "./Search.svelte";
 import DisplaySettings from "./widget/DisplaySettings.svelte";
 import NavMenuPanel from "./widget/NavMenuPanel.astro";
 
@@ -135,12 +134,12 @@ function loadButtonScript() {
     let searchInput = document.getElementById("search-input");
     let searchResults = document.getElementById("search-results");
     let searchResultsContent = document.getElementById("search-results-content");
-    let searchTimeout;
+    let searchTimeout: number;
 
     if (searchInput && searchResults && searchResultsContent) {
         // Show search results panel when input is focused
         searchInput.addEventListener("focus", function() {
-            if (this.value.trim() !== "") {
+            if ((this as HTMLInputElement).value.trim() !== "") {
                 searchResults.classList.remove("hidden");
             }
         });
@@ -154,7 +153,7 @@ function loadButtonScript() {
 
         // Search functionality on input
         searchInput.addEventListener("input", function() {
-            const keyword = this.value.trim();
+            const keyword = (this as HTMLInputElement).value.trim();
             
             // Clear previous timeout
             clearTimeout(searchTimeout);
@@ -196,8 +195,8 @@ function loadButtonScript() {
                                 return `
                                     <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                                         <a href="${result.url}" class="block">
-                                            <div class="font-medium">${result.data.title}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">${result.data.excerpt}</div>
+                                            <div class="font-medium">${result.data?.title || ''}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">${result.data?.excerpt || ''}</div>
                                         </a>
                                     </div>
                                 `;

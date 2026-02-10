@@ -39,16 +39,10 @@
 			console.log = originalLog;
 
 			return devToolsOpen;
-		};
-
-		// 方法2: 检测调试器（暂时禁用，避免在性能差的设备上误触发）
-		function detectDebugger() {
-			// 暂时返回false，避免在性能较差的设备上误触发
-			return false;
 		}
 
 		// 方法3: 检测控制台尺寸（使用更可靠的方法，不使用debugger语句）
-		function detectConsoleSize() {
+		const detectConsoleSize = () => {
 			// 方法1: 检测窗口外部尺寸与内部尺寸的差异
 			// 只有当差异非常明显时才认为控制台打开
 			const outerWidth = window.outerWidth;
@@ -78,7 +72,7 @@
 	})();
 
 	// 当检测到控制台打开时的处理函数
-	function handleDevToolsOpen() {
+	const handleDevToolsOpen = () => {
 		// 方案1: 重定向到空白页面
 		// window.location.replace('about:blank');
 
@@ -141,24 +135,24 @@
 	}
 
 	// 安全的类型检查函数
-	function isNumber(value) {
+	const isNumber = (value) => {
 		return (
 			typeof value === "number" &&
 			!Number.isNaN(value) &&
 			Number.isFinite(value)
 		);
-	}
+	};
 
-	function isArray(value) {
+	const isArray = (value) => {
 		return Array.isArray(value);
-	}
+	};
 
-	function isObject(value) {
+	const isObject = (value) => {
 		return value !== null && typeof value === "object" && !Array.isArray(value);
-	}
+	};
 
 	// 安全的localStorage操作
-	function safeLocalStorageGet(key) {
+	const safeLocalStorageGet = (key) => {
 		try {
 			// 验证key参数
 			if (typeof key !== "string" || key.length === 0) {
@@ -169,9 +163,9 @@
 			// 静默处理错误，不暴露在控制台
 			return null;
 		}
-	}
+	};
 
-	function safeLocalStorageSet(key, value) {
+	const safeLocalStorageSet = (key, value) => {
 		try {
 			// 验证key参数
 			if (typeof key !== "string" || key.length === 0) {
@@ -187,10 +181,10 @@
 			// 静默处理错误，不暴露在控制台
 			return false;
 		}
-	}
+	};
 
 	// 加密函数
-	function encrypt(data) {
+	const encrypt = (data) => {
 		try {
 			// 验证数据类型
 			if (
@@ -206,10 +200,10 @@
 			// 静默处理错误，不暴露在控制台
 			return null;
 		}
-	}
+	};
 
 	// 解密函数
-	function decrypt(encryptedData) {
+	const decrypt = (encryptedData) => {
 		try {
 			// 验证输入
 			if (typeof encryptedData !== "string" || encryptedData.length === 0) {
@@ -220,10 +214,10 @@
 			// 静默处理错误，不暴露在控制台
 			return null;
 		}
-	}
+	};
 
 	// 获取存储的数据
-	function getData(key) {
+	const getData = (key) => {
 		try {
 			const encrypted = safeLocalStorageGet(key);
 			if (!encrypted) {
@@ -252,10 +246,10 @@
 			// 静默处理错误，不暴露在控制台
 			return null;
 		}
-	}
+	};
 
 	// 存储数据
-	function setData(key, data) {
+	const setData = (key, data) => {
 		try {
 			// 验证数据结构
 			if (!isObject(data)) {
@@ -278,10 +272,10 @@
 			// 静默处理错误，不暴露在控制台
 			return false;
 		}
-	}
+	};
 
 	// 安全的路径比较函数
-	function comparePaths(path1, path2) {
+	const comparePaths = (path1, path2) => {
 		try {
 			// 验证输入
 			if (typeof path1 !== "string" || typeof path2 !== "string") {
@@ -295,10 +289,10 @@
 			// 静默处理错误，不暴露在控制台
 			return false;
 		}
-	}
+	};
 
 	// 安全的重定向函数
-	function safeRedirect(url) {
+	const safeRedirect = (url) => {
 		try {
 			// 验证URL
 			if (typeof url !== "string" || url.length === 0) {
@@ -318,7 +312,7 @@
 			// 静默处理错误，不暴露在控制台
 			return false;
 		}
-	}
+	};
 
 	// 访问限制配置（加密）
 	const CONFIG = {
@@ -335,7 +329,7 @@
 	};
 
 	// 主函数
-	function rateLimit() {
+	const rateLimit = () => {
 		try {
 			// 获取当前时间戳
 			const now = Date.now();
@@ -418,7 +412,7 @@
 			// 静默处理错误，不暴露在控制台
 			// 即使出错，也确保系统不会崩溃
 		}
-	}
+	};
 
 	// 定期检查是否应该解除封锁
 	setInterval(() => {

@@ -66,12 +66,21 @@
     font-size: 14px;
     color: #666;
   }
+  
+  .ip-info {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+  }
 </style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="b5a277d7-e97b-4304-be0b-345a411efe64"></script>
 </head>
 <body>
 
 <div class="content">
  <div class="text">请求携带恶意请求已被拦截</div>
+ <div class="ip-info" id="ip-info"></div>
 </div>
 
 <div class="countdown" id="countdown">15秒后将自动返回主页...</div>
@@ -121,6 +130,61 @@
   
   // 初始更新
   updateCountdown();
+  
+  // 显示IP信息
+  function displayIPInfo() {
+    const ipInfoElement = document.getElementById('ip-info');
+    if (!ipInfoElement) return;
+    
+    try {
+      const ipInfoData = localStorage.getItem('current_ip_info');
+      if (ipInfoData) {
+        const ipInfo = JSON.parse(ipInfoData);
+        ipInfoElement.textContent = `当前IP: ${ipInfo.ip} | 地址: ${ipInfo.location}`;
+      } else {
+        // 如果没有IP信息，尝试从ip.cn获取
+        fetch('https://ip.cn/')
+          .then(response => response.text())
+          .then(text => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const ipElements = doc.querySelectorAll('p');
+            let ip = '未知';
+            let location = '未知';
+            
+            ipElements.forEach((element, index) => {
+              if (element.textContent.includes('您现在的IP')) {
+                // IP地址在当前元素的下一个兄弟元素中
+                const nextElement = element.nextElementSibling;
+                if (nextElement) {
+                  ip = nextElement.textContent.trim();
+                }
+              } else if (element.textContent.includes('所在地理位置')) {
+                // 地理位置在当前元素的下一个兄弟元素中
+                const nextElement = element.nextElementSibling;
+                if (nextElement) {
+                  location = nextElement.textContent.trim();
+                }
+              }
+            });
+            
+            ipInfoElement.textContent = `当前IP: ${ip} | 地址: ${location}`;
+            // 存储IP信息到localStorage
+            localStorage.setItem('current_ip_info', JSON.stringify({ ip, location }));
+          })
+          .catch(error => {
+            console.error('获取IP信息失败:', error);
+            ipInfoElement.textContent = '当前IP: 未知 | 地址: 未知';
+          });
+      }
+    } catch (e) {
+      console.error('显示IP信息失败:', e);
+      ipInfoElement.textContent = '当前IP: 未知 | 地址: 未知';
+    }
+  }
+  
+  // 调用显示IP信息
+  displayIPInfo();
   
   // 每秒更新一次
   const countdownInterval = setInterval(updateCountdown, 1000);

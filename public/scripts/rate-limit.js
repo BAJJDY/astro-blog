@@ -177,77 +177,113 @@
     };
 
     // 主函数
-    function rateLimit() {
-        try {
-            // 获取当前时间戳
-            const now = Date.now();
-            const nowSeconds = Math.floor(now / 1000);
+  function rateLimit() {
+    try {
+      // 获取当前时间戳
+      const now = Date.now();
+      const nowSeconds = Math.floor(now / 1000);
 
-            // 检查当前是否已经在封锁页面
-            const currentPath = window.location.pathname;
-            const isBlockPage = comparePaths(currentPath, CONFIG.BLOCK_PAGE);
+      // 检查当前是否已经在封锁页面
+      const currentPath = window.location.pathname;
+      const isBlockPage = comparePaths(currentPath, CONFIG.BLOCK_PAGE);
 
-            // 获取存储的访问数据
-            let accessData = getData(CONFIG.STORAGE_KEY);
+      // 获取存储的访问数据
+      let accessData = getData(CONFIG.STORAGE_KEY);
 
-            if (!accessData) {
-                // 首次访问，初始化数据
-                accessData = {
-                    requests: [],
-                    blockedUntil: 0
-                };
-            }
+      if (!accessData) {
+        // 首次访问，初始化数据
+        accessData = {
+          requests: [],
+          blockedUntil: 0,
+          ips: {}
+        };
+      }
 
-            // 检查是否被封锁
-            if (isNumber(accessData.blockedUntil) && nowSeconds < accessData.blockedUntil) {
-                // 被封锁，无论当前在哪个页面，都强制重定向到封锁页面
-                if (!isBlockPage) {
-                    safeRedirect(CONFIG.BLOCK_PAGE);
-                }
-                return;
-            }
-
-            // 解除封锁状态
-            if (isNumber(accessData.blockedUntil) && accessData.blockedUntil > 0 && nowSeconds >= accessData.blockedUntil) {
-                accessData.blockedUntil = 0;
-                accessData.requests = [];
-                // 如果当前在封锁页面，则跳转到首页
-                if (isBlockPage) {
-                    safeRedirect('/');
-                }
-            }
-
-            // 如果当前在封锁页面，但用户没有被封锁，说明是故意输入的路径，重定向到首页
-            if (isBlockPage && (!isNumber(accessData.blockedUntil) || accessData.blockedUntil <= nowSeconds)) {
-                safeRedirect('/');
-                return;
-            }
-
-            // 清理过期的请求记录
-            accessData.requests = accessData.requests.filter(timestamp => {
-                return isNumber(timestamp) && nowSeconds - timestamp < CONFIG.WINDOW_SECONDS;
-            });
-
-            // 添加当前请求记录
-            accessData.requests.push(nowSeconds);
-
-            // 检查是否超过最大请求次数
-            if (accessData.requests.length > CONFIG.MAX_REQUESTS) {
-                // 超过限制，设置封锁
-                accessData.blockedUntil = nowSeconds + CONFIG.BLOCK_SECONDS;
-                // 存储更新后的数据
-                setData(CONFIG.STORAGE_KEY, accessData);
-                // 立即执行重定向，防止用户打断
-                safeRedirect(CONFIG.BLOCK_PAGE);
-            } else {
-                // 存储更新后的数据
-                setData(CONFIG.STORAGE_KEY, accessData);
-            }
-        } catch (e) {
-            console.error('rateLimit函数执行失败:', e);
-            // 即使出错，也确保系统不会崩溃
+      // 检查是否被封锁
+      if (isNumber(accessData.blockedUntil) && nowSeconds < accessData.blockedUntil) {
+        // 被封锁，无论当前在哪个页面，都强制重定向到封锁页面
+        if (!isBlockPage) {
+          safeRedirect(CONFIG.BLOCK_PAGE);
         }
+        return;
+      }
+
+      // 解除封锁状态
+      if (isNumber(accessData.blockedUntil) && accessData.blockedUntil > 0 && nowSeconds >= accessData.blockedUntil) {
+        accessData.blockedUntil = 0;
+        accessData.requests = [];
+        accessData.ips = {};
+        // 如果当前在封锁页面，则跳转到首页
+        if (isBlockPage) {
+          safeRedirect('/');
+        }
+      }
+
+      // 如果当前在封锁页面，但用户没有被封锁，说明是故意输入的路径，重定向到首页
+      if (isBlockPage && (!isNumber(accessData.blockedUntil) || accessData.blockedUntil <= nowSeconds)) {
+        safeRedirect('/');
+        return;
+      }
+
+      // 清理过期的请求记录
+      accessData.requests = accessData.requests.filter(timestamp => {
+        return isNumber(timestamp) && nowSeconds - timestamp < CONFIG.WINDOW_SECONDS;
+      });
+
+      // 处理IP访问记录
+      if (!accessData.ips) {
+        accessData.ips = {};
+      }
+
+      // 尝试获取当前IP信息
+      let currentIP = 'unknown';
+      try {
+        const ipInfoData = localStorage.getItem('current_ip_info');
+        if (ipInfoData) {
+          const ipInfo = JSON.parse(ipInfoData);
+          currentIP = ipInfo.ip || 'unknown';
+        }
+      } catch (e) {
+        console.error('获取IP信息失败:', e);
+      }
+
+      // 更新当前IP的访问记录
+      if (!accessData.ips[currentIP]) {
+        accessData.ips[currentIP] = [];
+      }
+
+      // 清理当前IP的过期记录
+      accessData.ips[currentIP] = accessData.ips[currentIP].filter(timestamp => {
+        return isNumber(timestamp) && nowSeconds - timestamp < CONFIG.WINDOW_SECONDS;
+      });
+
+      // 添加当前请求记录
+      accessData.requests.push(nowSeconds);
+      accessData.ips[currentIP].push(nowSeconds);
+
+      // 检查是否超过最大请求次数
+      // 检查同一IP的请求次数
+      const ipRequestCount = accessData.ips[currentIP].length;
+      // 检查同一时间不同IP的请求次数（IP数量）
+      const uniqueIPs = Object.keys(accessData.ips).length;
+
+      // 如果同一IP请求过多或同一时间不同IP请求过多，触发封禁
+      if (accessData.requests.length > CONFIG.MAX_REQUESTS || ipRequestCount > CONFIG.MAX_REQUESTS || uniqueIPs > 3) {
+        // 超过限制，设置封锁
+        accessData.blockedUntil = nowSeconds + CONFIG.BLOCK_SECONDS;
+        // 存储更新后的数据
+        setData(CONFIG.STORAGE_KEY, accessData);
+        // 立即执行重定向，防止用户打断
+        safeRedirect(CONFIG.BLOCK_PAGE);
+      } else {
+        // 存储更新后的数据
+        setData(CONFIG.STORAGE_KEY, accessData);
+      }
+    } catch (e) {
+      console.error('rateLimit函数执行失败:', e);
+      // 即使出错，也确保系统不会崩溃
     }
+  }
 
     // 定期检查是否应该解除封锁
     setInterval(function() {

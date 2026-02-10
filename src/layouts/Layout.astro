@@ -1,5 +1,6 @@
 ---
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import IPChecker from "@components/IPChecker.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
 	AUTO_MODE,
@@ -158,6 +159,9 @@ const bannerOffset =
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
+		<!-- Umami Analytics -->
+		<script defer src="https://cloud.umami.is/script.js" data-website-id="b5a277d7-e97b-4304-be0b-345a411efe64"></script>
+
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		data-overlayscrollbars-initialize
@@ -165,6 +169,7 @@ const bannerOffset =
 	>
 
 		<ConfigCarrier></ConfigCarrier>
+		<IPChecker></IPChecker>
 		<slot />
 
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->

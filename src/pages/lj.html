@@ -97,7 +97,7 @@
     localStorage.setItem(STORAGE_KEY, startTime);
   } else {
     // 转换为数字
-    startTime = parseInt(startTime, 10);
+    startTime = Number.parseInt(startTime, 10);
   }
   
   // 计算剩余秒数

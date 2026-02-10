@@ -134,7 +134,7 @@ function loadButtonScript() {
     let searchInput = document.getElementById("search-input");
     let searchResults = document.getElementById("search-results");
     let searchResultsContent = document.getElementById("search-results-content");
-    let searchTimeout: number;
+    let searchTimeout: any;
 
     if (searchInput && searchResults && searchResultsContent) {
         // Show search results panel when input is focused
@@ -191,12 +191,12 @@ function loadButtonScript() {
                                 <div class="text-sm text-gray-600 dark:text-gray-300">没有找到匹配的结果</div>
                             `;
                         } else {
-                            const resultsHtml = results.results.map(result => {
+                            const resultsHtml = results.results.map((result: any) => {
                                 return `
                                     <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                        <a href="${result.url}" class="block">
-                                            <div class="font-medium">${result.data?.title || ''}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">${result.data?.excerpt || ''}</div>
+                                        <a href="${result.url || ''}" class="block">
+                                            <div class="font-medium">${result.title || ''}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">${result.excerpt || ''}</div>
                                         </a>
                                     </div>
                                 `;

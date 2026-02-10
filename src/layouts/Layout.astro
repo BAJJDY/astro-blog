@@ -280,7 +280,7 @@ optimizeThemeTransition();
 
 const bannerEnabled = !!document.getElementById('banner-wrapper')
 
-function setClickOutsideToClose(panel: string, ignores: string[]) {
+function setClickOutsideToClose(panel, ignores) {
 	document.addEventListener("click", event => {
 		let panelDom = document.getElementById(panel);
 		let tDom = event.target;
@@ -290,8 +290,10 @@ function setClickOutsideToClose(panel: string, ignores: string[]) {
 			if (ie == tDom || (ie?.contains(tDom))) {
 				return;
 			}
-		}
-		panelDom!.classList.add("float-panel-closed");
+	}
+	if (panelDom) {
+		panelDom.classList.add("float-panel-closed");
+	}
 	});
 }
 setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
@@ -328,7 +330,7 @@ function initCustomScrollbar() {
 		sizeAutoCapable: true,
 	});
 
-	const katexElements = document.querySelectorAll('.katex-display') as NodeListOf<HTMLElement>;
+	const katexElements = document.querySelectorAll('.katex-display');
 
 	const katexObserverOptions = {
 		root: null,
@@ -336,7 +338,7 @@ function initCustomScrollbar() {
 		threshold: 0.1
 	};
 
-	const processKatexElement = (element: HTMLElement) => {
+	const processKatexElement = (element) => {
 		if (!element.parentNode) return;
 		if (element.hasAttribute('data-scrollbar-initialized')) return;
 
@@ -362,7 +364,7 @@ function initCustomScrollbar() {
 	const katexObserver = new IntersectionObserver((entries, observer) => {
 		entries.forEach(entry => {
 			if (entry.isIntersecting) {
-			processKatexElement(entry.target as HTMLElement);
+			processKatexElement(entry.target);
 			observer.unobserve(entry.target);
 			}
 		});
@@ -427,13 +429,13 @@ const setup = () => {
 		}
 	})
 	window.swup.hooks.on('content:replace', initCustomScrollbar)
-	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
+	window.swup.hooks.on('visit:start', (visit) => {
 		// change banner height immediately when a link is clicked
 		const bodyElement = document.querySelector('body')
-		if (pathsEqual(visit.to.url, url('/'))) {
-			bodyElement!.classList.add('lg:is-home');
-		} else {
-			bodyElement!.classList.remove('lg:is-home');
+		if (bodyElement && pathsEqual(visit.to.url, url('/'))) {
+			bodyElement.classList.add('lg:is-home');
+		} else if (bodyElement) {
+			bodyElement.classList.remove('lg:is-home');
 		}
 
 		// increase the page height during page transition to prevent the scrolling animation from jumping
@@ -455,7 +457,7 @@ const setup = () => {
 			heightExtend.classList.remove('hidden')
 		}
 	});
-	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
+	window.swup.hooks.on('visit:end', (_visit) => {
 		setTimeout(() => {
 			const heightExtend = document.getElementById('page-height-extend')
 			if (heightExtend) {
@@ -530,7 +532,7 @@ window.onresize = () => {
 import PhotoSwipeLightbox from "photoswipe/lightbox"
 import "photoswipe/style.css"
 
-let lightbox: PhotoSwipeLightbox
+let lightbox
 let pswp = import("photoswipe")
 
 function createPhotoSwipe() {

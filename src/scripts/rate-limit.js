@@ -39,7 +39,7 @@
 			console.log = originalLog;
 
 			return devToolsOpen;
-		}
+		};
 
 		// 方法3: 检测控制台尺寸（使用更可靠的方法，不使用debugger语句）
 		const detectConsoleSize = () => {
@@ -57,7 +57,7 @@
 			// 只有当差异超过30%时才认为控制台打开
 			// 进一步提高阈值，避免在正常触发拦截时误触发黑屏
 			return widthDiffRatio > 0.3 || heightDiffRatio > 0.3;
-		}
+		};
 
 		// 综合检测 - 更严格的检测逻辑，只有当多种方法都检测到控制台打开时才返回true
 		window.detectDevTools = () => {
@@ -132,7 +132,7 @@
 			},
 			true,
 		);
-	}
+	};
 
 	// 安全的类型检查函数
 	const isNumber = (value) => {

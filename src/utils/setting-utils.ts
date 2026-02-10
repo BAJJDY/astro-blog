@@ -1,9 +1,4 @@
-import {
-	AUTO_MODE,
-	DARK_MODE,
-	DEFAULT_THEME,
-	LIGHT_MODE,
-} from "@constants/constants.ts";
+import { AUTO_MODE, DARK_MODE, DEFAULT_THEME } from "@constants/constants.ts";
 import { expressiveCodeConfig } from "@/config";
 import type { LIGHT_DARK_MODE } from "@/types/config";
 
@@ -49,20 +44,20 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 	if (isBrowser()) {
 		// 直接操作DOM，使用最快的方法切换主题
 		const htmlElement = document.documentElement;
-		
+
 		// 立即执行主题切换，不使用任何动画或过渡
-		const isDarkMode = theme === DARK_MODE || (theme === AUTO_MODE && window.matchMedia("(prefers-color-scheme: dark)").matches);
-		
+		const isDarkMode =
+			theme === DARK_MODE ||
+			(theme === AUTO_MODE &&
+				window.matchMedia("(prefers-color-scheme: dark)").matches);
+
 		// 使用classList的toggle方法，这是DOM API中最快的方法之一
 		// 第二个参数为true表示添加类，false表示移除类
-		htmlElement.classList.toggle('dark', isDarkMode);
+		htmlElement.classList.toggle("dark", isDarkMode);
 
 		// Set the theme for Expressive Code
-		htmlElement.setAttribute(
-			"data-theme",
-			expressiveCodeConfig.theme,
-		);
-		
+		htmlElement.setAttribute("data-theme", expressiveCodeConfig.theme);
+
 		// 强制浏览器立即重绘
 		htmlElement.offsetHeight; // 触发重排
 	}

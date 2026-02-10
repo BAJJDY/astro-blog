@@ -19,7 +19,9 @@ const loadedTranslations: { [key: string]: Translation } = {
 };
 
 // Map language codes to their respective modules
-const languageModules: { [key: string]: () => Promise<{ default: Translation }> } = {
+const languageModules: {
+	[key: string]: () => Promise<{ default: Translation }>;
+} = {
 	es: () => import("./languages/es"),
 	id: () => import("./languages/id"),
 	ja: () => import("./languages/ja"),
@@ -38,12 +40,12 @@ const languageModules: { [key: string]: () => Promise<{ default: Translation }> 
 
 export async function getTranslationAsync(lang: string): Promise<Translation> {
 	const normalizedLang = lang.toLowerCase();
-	
+
 	// Return from cache if already loaded
 	if (loadedTranslations[normalizedLang]) {
 		return loadedTranslations[normalizedLang];
 	}
-	
+
 	// Try to load the translation module
 	const moduleLoader = languageModules[normalizedLang];
 	if (moduleLoader) {
@@ -56,7 +58,7 @@ export async function getTranslationAsync(lang: string): Promise<Translation> {
 			return defaultTranslation;
 		}
 	}
-	
+
 	return defaultTranslation;
 }
 

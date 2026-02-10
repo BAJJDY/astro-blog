@@ -144,25 +144,28 @@
         return true;
       }
       
-      // 检测控制台是否打开的方法
+      // 检测控制台是否打开的方法（更可靠的实现）
       let devToolsOpen = false;
       
-      // 保存原始的toString方法
-      const originalToString = Object.prototype.toString;
+      // 保存原始的log方法
+      const originalLog = console.log;
       
-      // 重写toString方法
-      Object.prototype.toString = function() {
-        if (this === console) {
+      // 重写log方法
+      console.log = function(...args) {
+        // 检测调用栈
+        const stack = new Error().stack || '';
+        // 如果调用栈中包含控制台相关的信息，可能是控制台打开了
+        if (stack.includes('console') || stack.includes('Console')) {
           devToolsOpen = true;
         }
-        return originalToString.apply(this, arguments);
+        return originalLog.apply(this, args);
       };
       
-      // 尝试触发toString
+      // 尝试触发log
       console.log('');
       
-      // 恢复原始的toString方法
-      Object.prototype.toString = originalToString;
+      // 恢复原始的log方法
+      console.log = originalLog;
       
       return devToolsOpen;
     };
@@ -186,16 +189,20 @@
       const widthDiffRatio = Math.abs(outerWidth - innerWidth) / outerWidth;
       const heightDiffRatio = Math.abs(outerHeight - innerHeight) / outerHeight;
       
-      // 只有当差异超过20%时才认为控制台打开
-      // 这样可以避免因浏览器窗口大小调整或其他因素导致的误触发
-      return (
-        widthDiffRatio > 0.2 || heightDiffRatio > 0.2
-      );
+      // 只有当差异超过30%时才认为控制台打开
+      // 进一步提高阈值，避免在正常触发拦截时误触发黑屏
+      return widthDiffRatio > 0.3 || heightDiffRatio > 0.3;
     }
     
-    // 综合检测
+    // 综合检测 - 更严格的检测逻辑，只有当多种方法都检测到控制台打开时才返回true
     window.detectDevTools = function() {
-      return checkDevTools() || detectDebugger() || detectConsoleSize();
+      // 方法1: 检查console对象是否被修改
+      const devToolsOpen = checkDevTools();
+      // 方法2: 检查控制台尺寸是否异常
+      const consoleSizeAbnormal = detectConsoleSize();
+      // 只有当两种方法都检测到异常时才认为控制台打开
+      // 这样可以避免在正常触发拦截时误触发黑屏
+      return devToolsOpen && consoleSizeAbnormal;
     };
   })();
   

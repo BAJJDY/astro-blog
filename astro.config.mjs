@@ -25,13 +25,9 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 
 // https://astro.build/config
-// Use SITE_URL for production (set in Cloudflare Pages), otherwise use Cloudflare Pages default URL, then localhost for development
-const site = process.env.SITE_URL || process.env.CF_PAGES_URL || "http://localhost:4321/";
-
 export default defineConfig({
-	site: site,
-	base: "/",
-	trailingSlash: "always",
+		base: "/",
+		trailingSlash: "ignore",
 	devToolbar: {
 		enabled: false,
 	},
@@ -160,6 +156,17 @@ export default defineConfig({
 		],
 	},
 	vite: {
+		resolve: {
+			alias: {
+				'@components': '/src/components',
+				'@assets': '/src/assets',
+				'@constants': '/src/constants',
+				'@utils': '/src/utils',
+				'@i18n': '/src/i18n',
+				'@layouts': '/src/layouts',
+				'@': '/src'
+			}
+		},
 		build: {
 			rollupOptions: {
 				onwarn(warning, warn) {

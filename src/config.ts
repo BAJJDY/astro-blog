@@ -45,16 +45,12 @@ export const navBarConfig: NavBarConfig = {
 			name: "归档",
 			url: "/archive/",
 		},
-		{
-			name: "关于",
-			url: "/about/",
-		},
 	],
 };
 
 export const profileConfig: ProfileConfig = {
 	avatar: "/12.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "BAJJDY",
+	name: "不爱剪辑的Y",
 	bio: "热爱技术与分享的开发者",
 	links: [
 		{
@@ -63,11 +59,6 @@ export const profileConfig: ProfileConfig = {
 			// You will need to install the corresponding icon set if it's not already included
 			// `pnpm add @iconify-json/<icon-set-name>`
 			url: "https://space.bilibili.com/3494367822088680?spm_id_from=333.1007.0.0",
-		},
-		{
-			name: "Steam",
-			icon: "fa6-brands:steam",
-			url: "https://steamcommunity.com/profiles/76561198783434745/",
 		},
 		{
 			name: "GitHub",

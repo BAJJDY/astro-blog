@@ -25,7 +25,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
     <div class:list={[
         className,
         "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
-        <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95">
+        <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 user-select-none">
             <div class="flex flex-row text-[var(--primary)] items-center text-md">
                 <Icon name="material-symbols:home-outline-rounded" class="text-[1.75rem] mb-1 mr-2" />
                 {siteConfig.title}
@@ -34,7 +34,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
         <div class="hidden md:flex">
             {links.map((l) => {
                 return <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
-                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 user-select-none"
                 >
                     <div class="flex items-center">
                         {l.name}
@@ -44,9 +44,24 @@ let links: NavBarLink[] = navBarConfig.links.map(
             })}
         </div>
         <div class="flex items-center gap-2">
-            <!--<SearchPanel client:load>-->
-            <!-- @ts-ignore client:load is an Astro directive -->
-            <Search client:load></Search>
+            <!-- Search button -->
+            <div class="hidden lg:flex">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 flex items-center w-64">
+                    <Icon name="material-symbols:search" class="text-gray-400 dark:text-gray-500 mr-2"></Icon>
+                    <input type="text" placeholder="搜索" class="bg-transparent border-none outline-none flex-grow text-gray-900 dark:text-gray-100">
+                </div>
+            </div>
+            <!-- Search results panel -->
+            <div id="search-results" class="hidden absolute top-16 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+                <div id="search-results-content" class="p-4">
+                    <!-- Search results will be displayed here -->
+                </div>
+            </div>
+            <!-- toggle btn for phone/tablet view -->
+            <button aria-label="Search Panel" id="search-switch"
+                    class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90">
+                <Icon name="material-symbols:search" class="text-[1.25rem]"></Icon>
+            </button>
             {!siteConfig.themeColor.fixed && (
                     <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
                         <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
@@ -68,13 +83,24 @@ let links: NavBarLink[] = navBarConfig.links.map(
 
 <script>
 function switchTheme() {
+    // 直接操作DOM，不使用任何过渡效果
+    const htmlElement = document.documentElement;
+    
+    // 立即执行主题切换，不使用任何动画或过渡
     if (localStorage.theme === 'dark') {
-        document.documentElement.classList.remove('dark');
+        // 直接移除dark类
+        htmlElement.classList.remove('dark');
         localStorage.theme = 'light';
     } else {
-        document.documentElement.classList.add('dark');
+        // 直接添加dark类
+        htmlElement.classList.add('dark');
         localStorage.theme = 'dark';
     }
+    
+    // 强制浏览器立即重绘，使用最快速的方法
+    // 方法：修改display属性触发重绘
+    htmlElement.style.display = 'block';
+    htmlElement.offsetHeight; // 触发重排
 }
 
 function loadButtonScript() {
@@ -103,6 +129,98 @@ function loadButtonScript() {
                 menuPanel.classList.toggle("float-panel-closed");
             }
         };
+    }
+
+    // Search functionality
+    let searchInput = document.getElementById("search-input");
+    let searchResults = document.getElementById("search-results");
+    let searchResultsContent = document.getElementById("search-results-content");
+    let searchTimeout;
+
+    if (searchInput && searchResults && searchResultsContent) {
+        // Show search results panel when input is focused
+        searchInput.addEventListener("focus", function() {
+            if (this.value.trim() !== "") {
+                searchResults.classList.remove("hidden");
+            }
+        });
+
+        // Hide search results panel when input is blurred
+        searchInput.addEventListener("blur", function() {
+            setTimeout(function() {
+                searchResults.classList.add("hidden");
+            }, 200);
+        });
+
+        // Search functionality on input
+        searchInput.addEventListener("input", function() {
+            const keyword = this.value.trim();
+            
+            // Clear previous timeout
+            clearTimeout(searchTimeout);
+            
+            if (keyword.length === 0) {
+                searchResults.classList.add("hidden");
+                return;
+            }
+            
+            // Set timeout for debouncing
+            searchTimeout = setTimeout(async function() {
+                try {
+                    // Check if Pagefind is available
+                    if (typeof window.pagefind === "undefined") {
+                        // Use mock data in development mode
+                        searchResultsContent.innerHTML = `
+                            <div class="text-sm text-gray-600 dark:text-gray-300 mb-2">搜索结果 (模拟数据)</div>
+                            <div class="space-y-2">
+                                <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <div class="font-medium">这是一个模拟搜索结果</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">因为搜索在开发环境中无法正常工作</div>
+                                </div>
+                                <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <div class="font-medium">如果你想测试搜索功能</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">请尝试运行 npm run build && npm run preview</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Use Pagefind for actual search
+                        const results = await window.pagefind.search(keyword);
+                        
+                        if (results.results.length === 0) {
+                            searchResultsContent.innerHTML = `
+                                <div class="text-sm text-gray-600 dark:text-gray-300">没有找到匹配的结果</div>
+                            `;
+                        } else {
+                            const resultsHtml = results.results.map(result => {
+                                return `
+                                    <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                        <a href="${result.url}" class="block">
+                                            <div class="font-medium">${result.data.title}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">${result.data.excerpt}</div>
+                                        </a>
+                                    </div>
+                                `;
+                            }).join("");
+                            
+                            searchResultsContent.innerHTML = `
+                                <div class="text-sm text-gray-600 dark:text-gray-300 mb-2">搜索结果</div>
+                                <div class="space-y-2">${resultsHtml}</div>
+                            `;
+                        }
+                    }
+                    
+                    // Show search results panel
+                    searchResults.classList.remove("hidden");
+                } catch (error) {
+                    console.error("Search error:", error);
+                    searchResultsContent.innerHTML = `
+                        <div class="text-sm text-red-600 dark:text-red-400">搜索时出错</div>
+                    `;
+                    searchResults.classList.remove("hidden");
+                }
+            }, 300); // 300ms debounce
+        });
     }
 }
 
@@ -144,3 +262,134 @@ if (document.readyState === 'loading') {
     loadPagefind();
 }
 </script>}
+
+<style>
+/* From Uiverse.io by TimTrayler */ 
+.searchbar { 
+  font-size: 14px; 
+  font-family: arial, sans-serif; 
+  color: #202124; 
+  display: flex; 
+  z-index: 3; 
+  height: 44px; 
+  background: white; 
+  border: 1px solid #dfe1e5; 
+  box-shadow: none; 
+  border-radius: 24px; 
+  margin: 0 auto; 
+  width: auto; 
+  max-width: 224px; 
+}
+
+.searchbar:hover { 
+  box-shadow: 0 1px 6px rgb(32 33 36 / 28%); 
+  border-color: rgba(223,225,229,0); 
+}
+
+.searchbar-wrapper { 
+  flex: 1; 
+  display: flex; 
+  padding: 5px 8px 0 14px; 
+}
+
+.searchbar-left { 
+  font-size: 14px; 
+  font-family: arial, sans-serif; 
+  color: #202124; 
+  display: flex; 
+  align-items: center; 
+  padding-right: 13px; 
+  margin-top: -5px; 
+}
+
+.search-icon-wrapper { 
+  margin: auto; 
+}
+
+.search-icon { 
+  margin-top: 3px; 
+  color: #9aa0a6; 
+  height: 20px; 
+  line-height: 20px; 
+  width: 20px; 
+}
+
+.searchbar-icon { 
+  display: inline-block; 
+  fill: currentColor; 
+  height: 24px; 
+  line-height: 24px; 
+  position: relative; 
+  width: 24px; 
+}
+
+.searchbar-center { 
+  display: flex; 
+  flex: 1; 
+  flex-wrap: wrap; 
+}
+
+.searchbar-input-spacer { 
+  color: transparent; 
+  flex: 100%; 
+  white-space: pre; 
+  height: 34px; 
+  font-size: 16px; 
+}
+
+.searchbar-input { 
+  background-color: transparent; 
+  border: none; 
+  margin: 0; 
+  padding: 0; 
+  color: rgba(0, 0, 0, .87); 
+  word-wrap: break-word; 
+  outline: none; 
+  display: flex; 
+  flex: 100%; 
+  margin-top: -37px; 
+  height: 34px; 
+  font-size: 16px; 
+  max-width: 100%; 
+  width: 100%; 
+}
+
+.searchbar-right { 
+  display: flex; 
+  flex: 0 0 auto; 
+  margin-top: -5px; 
+  align-items: stretch; 
+  flex-direction: row 
+}
+
+.searchbar-clear-icon { 
+  margin-right: 12px 
+}
+
+.voice-search { 
+  flex: 1 0 auto; 
+  display: flex; 
+  cursor: pointer; 
+  align-items: center; 
+  border: 0; 
+  background: transparent; 
+  outline: none; 
+  padding: 0 8px; 
+  width: 2.8em; 
+}
+
+/* Dark mode styles */
+.dark .searchbar { 
+  background: #303134 !important; 
+  border: 1px solid #5f6368 !important; 
+  color: #e8eaed !important; 
+}
+
+.dark .searchbar-input { 
+  color: #e8eaed !important; 
+}
+
+.dark .search-icon { 
+  color: #9aa0a6 !important; 
+}
+</style>

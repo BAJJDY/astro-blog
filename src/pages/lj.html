@@ -152,7 +152,7 @@
             let ip = '未知';
             let location = '未知';
             
-            ipElements.forEach((element, index) => {
+            ipElements.forEach((element) => {
               if (element.textContent.includes('您现在的IP')) {
                 // IP地址在当前元素的下一个兄弟元素中
                 const nextElement = element.nextElementSibling;
@@ -187,17 +187,17 @@
   displayIPInfo();
   
   // 每秒更新一次
-  const countdownInterval = setInterval(updateCountdown, 1000);
+  setInterval(updateCountdown, 1000);
   
   // 禁止右键菜单
-  document.addEventListener('contextmenu', function(e) {
+  document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
   });
   
   // 高级反调试技术
-  (function() {
+  (() => {
     // 方法1: 检测控制台打开（使用更可靠的方法）
-    const checkDevTools = function() {
+    const checkDevTools = () => {
       // 检测console对象是否存在且未被修改
       if (typeof console === 'undefined') {
         return false;
@@ -234,14 +234,8 @@
       return devToolsOpen;
     };
     
-    // 方法2: 检测调试器（暂时禁用，避免在性能差的设备上误触发）
-    function detectDebugger() {
-      // 暂时返回false，避免在性能较差的设备上误触发
-      return false;
-    }
-    
     // 方法3: 检测控制台尺寸（使用更可靠的方法，不使用debugger语句）
-    function detectConsoleSize() {
+    const detectConsoleSize = () => {
       // 方法1: 检测窗口外部尺寸与内部尺寸的差异
       // 只有当差异非常明显时才认为控制台打开
       const outerWidth = window.outerWidth;
@@ -256,10 +250,10 @@
       // 只有当差异超过30%时才认为控制台打开
       // 进一步提高阈值，避免在正常触发拦截时误触发黑屏
       return widthDiffRatio > 0.3 || heightDiffRatio > 0.3;
-    }
+    };
     
     // 综合检测 - 更严格的检测逻辑，只有当多种方法都检测到控制台打开时才返回true
-    window.detectDevTools = function() {
+    window.detectDevTools = () => {
       // 方法1: 检查console对象是否被修改
       const devToolsOpen = checkDevTools();
       // 方法2: 检查控制台尺寸是否异常
@@ -307,13 +301,13 @@
     }, 50);
     
     // 禁用所有键盘事件
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', (e) => {
       e.preventDefault();
       return false;
     }, true);
     
     // 禁用所有鼠标事件
-    document.addEventListener('mousedown', function(e) {
+    document.addEventListener('mousedown', (e) => {
       e.preventDefault();
       return false;
     }, true);

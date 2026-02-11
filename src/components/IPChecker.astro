@@ -10,7 +10,7 @@ const { enableProtection = true } = Astro.props;
   <script>
     (function() {
       // 安全的localStorage操作
-      function safeLocalStorageGet(key) {
+      function safeLocalStorageGet(key: string): string | null {
         try {
           if (typeof key !== 'string' || key.length === 0) {
             return null;
@@ -22,7 +22,7 @@ const { enableProtection = true } = Astro.props;
         }
       }
 
-      function safeLocalStorageSet(key, value) {
+      function safeLocalStorageSet(key: string, value: string): boolean {
         try {
           if (typeof key !== 'string' || key.length === 0) {
             return false;
@@ -39,7 +39,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 加密函数
-      function encrypt(data) {
+      function encrypt(data: any): string | null {
         try {
           return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
         } catch (e) {
@@ -49,7 +49,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 解密函数
-      function decrypt(encryptedData) {
+      function decrypt(encryptedData: string): any | null {
         try {
           return JSON.parse(decodeURIComponent(escape(atob(encryptedData))));
         } catch (e) {
@@ -59,7 +59,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 获取存储的数据
-      function getData(key) {
+      function getData(key: string): any | null {
         try {
           const encrypted = safeLocalStorageGet(key);
           if (!encrypted) {
@@ -73,7 +73,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 存储数据
-      function setData(key, data) {
+      function setData(key: string, data: any): boolean {
         try {
           const encrypted = encrypt(data);
           if (!encrypted) {
@@ -87,7 +87,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 安全的重定向函数
-      function safeRedirect(url) {
+      function safeRedirect(url: string): boolean {
         try {
           if (typeof url !== 'string' || url.length === 0) {
             return false;
@@ -115,7 +115,7 @@ const { enableProtection = true } = Astro.props;
       };
 
       // 获取当前IP和地址
-      async function getIPInfo() {
+      async function getIPInfo(): Promise<{ ip: string; location: string }> {
         try {
           const response = await fetch(CONFIG.IP_API);
           if (!response.ok) {
@@ -132,14 +132,14 @@ const { enableProtection = true } = Astro.props;
           let ip = '未知';
           let location = '未知';
           
-          ipElements.forEach((element, index) => {
-            if (element.textContent.includes('您现在的IP')) {
+          ipElements.forEach((element) => {
+            if (element.textContent?.includes('您现在的IP')) {
               // IP地址在当前元素的下一个兄弟元素中
               const nextElement = element.nextElementSibling;
               if (nextElement) {
                 ip = nextElement.textContent.trim();
               }
-            } else if (element.textContent.includes('所在地理位置')) {
+            } else if (element.textContent?.includes('所在地理位置')) {
               // 地理位置在当前元素的下一个兄弟元素中
               const nextElement = element.nextElementSibling;
               if (nextElement) {
@@ -156,7 +156,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 检查IP是否在黑名单中
-      function isIPBlacklisted(ip) {
+      function isIPBlacklisted(ip: string): boolean {
         try {
           const blacklistData = safeLocalStorageGet(CONFIG.BLACKLIST_KEY);
           if (!blacklistData) {
@@ -171,9 +171,9 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 添加IP到黑名单
-      function addIPToBlacklist(ip) {
+      function addIPToBlacklist(ip: string): void {
         try {
-          let blacklist = [];
+          let blacklist: string[] = [];
           const blacklistData = safeLocalStorageGet(CONFIG.BLACKLIST_KEY);
           if (blacklistData) {
             blacklist = JSON.parse(blacklistData);
@@ -191,7 +191,7 @@ const { enableProtection = true } = Astro.props;
       }
 
       // 主函数
-      async function ipChecker() {
+      async function ipChecker(): Promise<void> {
         try {
           // 获取当前IP信息
           const ipInfo = await getIPInfo();
@@ -236,7 +236,7 @@ const { enableProtection = true } = Astro.props;
           }
 
           // 清理过期的请求记录
-          accessData.requests = accessData.requests.filter(timestamp => {
+          accessData.requests = accessData.requests.filter((timestamp: number) => {
             return timestamp && nowSeconds - timestamp < CONFIG.WINDOW_SECONDS;
           });
 
@@ -251,7 +251,7 @@ const { enableProtection = true } = Astro.props;
           }
           
           // 清理当前IP的过期记录
-          accessData.ips[ipInfo.ip] = accessData.ips[ipInfo.ip].filter(timestamp => {
+          accessData.ips[ipInfo.ip] = accessData.ips[ipInfo.ip].filter((timestamp: number) => {
             return timestamp && nowSeconds - timestamp < CONFIG.WINDOW_SECONDS;
           });
 

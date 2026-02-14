@@ -19,11 +19,11 @@ let links: NavBarLink[] = navBarConfig.links.map(
 	},
 );
 ---
-<div id="navbar" class="z-50 onload-animation">
-    <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
+<div id="navbar" class="navbar-glass-wrapper z-50 onload-animation">
+    <div class="navbar-glass absolute h-8 left-0 right-0 -top-8 transition"></div>
     <div class:list={[
         className,
-        "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
+        "navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4 rounded-[var(--radius-large)]"]}>
         <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 user-select-none">
             <div class="flex flex-row text-[var(--primary)] items-center text-md">
                 <Icon name="material-symbols:home-outline-rounded" class="text-[1.75rem] mb-1 mr-2" />
@@ -263,8 +263,24 @@ if (document.readyState === 'loading') {
 </script>}
 
 <style>
-/* From Uiverse.io by TimTrayler */ 
-.searchbar { 
+  .navbar-glass-wrapper {
+    isolation: isolate;
+  }
+  .navbar-glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.5) inset;
+  }
+  :global(.dark) .navbar-glass {
+    background: rgba(23, 23, 23, 0.72);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.2) inset;
+  }
+
+/* From Uiverse.io by TimTrayler */
+.searchbar {
   font-size: 14px; 
   font-family: arial, sans-serif; 
   color: #202124; 

@@ -170,3 +170,30 @@ body {
     }
   }
 }
+
+/* 针对所有 Markdown 转换出的 mark 标签 */
+:root mark,
+article mark,
+.custom-md mark {
+  background-image: linear-gradient(to right, #ffcf33 0%, #ffdf70 100%) !important;
+  background-repeat: no-repeat !important;
+  /* 初始状态：宽度为 100%，高度覆盖文字 80% */
+  background-size: 100% 80% !important;
+  background-position: 0 90% !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 4px !important;
+  border-radius: 2px !important;
+  display: inline !important;
+  font-weight: normal !important;
+  
+  /* 丝滑的展开动画 */
+  transition: background-size 1s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 当 mark 标签获得 .animate 类时触发涂抹 */
+:root mark.animate,
+article mark.animate,
+.custom-md mark.animate {
+  background-size: 100% 80% !important;
+}

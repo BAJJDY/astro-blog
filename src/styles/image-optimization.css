@@ -1,0 +1,123 @@
+/* 图片优化样式 */
+
+/* 图片容器基础样式 */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 图片加载状态 */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+img.image-loaded {
+  opacity: 1;
+}
+
+/* 图片加载中的占位效果 */
+img.image-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  opacity: 0.6;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 图片加载失败样式 */
+img.image-error {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+/* 图片容器宽高比保持 */
+.image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-container::before {
+  content: '';
+  display: block;
+  padding-top: 56.25%; /* 16:9 默认比例 */
+}
+
+.image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 响应式图片优化 */
+@media (max-width: 768px) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* 减少重绘 */
+img {
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 首屏关键图片优化 */
+img[loading="eager"],
+img[fetchpriority="high"] {
+  opacity: 1;
+  content-visibility: auto;
+}
+
+/* 模糊加载效果（可选） */
+.blur-load {
+  background-size: cover;
+  background-position: center;
+}
+
+.blur-load img {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.blur-load img.loaded {
+  opacity: 1;
+}
+
+/* 渐进式 JPEG 优化 */
+img[src$=".jpg"],
+img[src$=".jpeg"] {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* WebP 支持检测 */
+.webp img[data-webp] {
+  content: attr(data-webp);
+}
+
+/* 打印优化 */
+@media print {
+  img {
+    page-break-inside: avoid;
+    max-width: 100% !important;
+  }
+}

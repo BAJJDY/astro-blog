@@ -6,9 +6,25 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getSortedPostsList } from "../utils/content-utils";
 
 const sortedPostsList = await getSortedPostsList();
+
+// 将 Date 对象转换为 ISO 字符串，以便正确传递给 Svelte 组件
+const serializedPosts = sortedPostsList.map((post) => ({
+	...post,
+	data: {
+		...post.data,
+		published:
+			post.data.published instanceof Date
+				? post.data.published.toISOString()
+				: post.data.published,
+		updated:
+			post.data.updated instanceof Date
+				? post.data.updated?.toISOString()
+				: post.data.updated,
+	},
+}));
 ---
 
 <MainGridLayout title={i18n(I18nKey.archive)}>
-    <ArchivePanel tags={[]} categories={[]} sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
+    <ArchivePanel tags={[]} categories={[]} sortedPosts={serializedPosts} client:only="svelte"></ArchivePanel>
 </MainGridLayout>
 

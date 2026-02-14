@@ -13,6 +13,8 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import remarkDirective from "remark-directive"; /* Handle directives */
 import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-directives";
+import remarkGfm from "remark-gfm"; /* GitHub Flavored Markdown support, including ==mark== syntax */
+import remarkMark from "remark-mark"; /* Handle ==mark== syntax */
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
 import { expressiveCodeConfig } from "./src/config.ts";
@@ -107,6 +109,8 @@ export default defineConfig({
 	],
 	markdown: {
 		remarkPlugins: [
+			remarkGfm,
+			remarkMark,
 			remarkMath,
 			remarkReadingTime,
 			remarkExcerpt,
@@ -115,6 +119,7 @@ export default defineConfig({
 			remarkSectionize,
 			parseDirectiveNode,
 		],
+		gfm: true,
 		rehypePlugins: [
 			rehypeKatex,
 			rehypeSlug,
@@ -169,6 +174,13 @@ export default defineConfig({
 				'@': '/src'
 			}
 		},
+		optimizeDeps: {
+			include: [
+				'overlayscrollbars',
+				'katex',
+				'photoswipe',
+			],
+		},
 		build: {
 			rollupOptions: {
 				onwarn(warning, warn) {
@@ -193,6 +205,10 @@ export default defineConfig({
 	},
 	image: {
 		optimize: true,
-		quality: 80,
+		quality: 85,
+		formats: ['webp', 'avif'],
+		service: {
+			entrypoint: 'astro/assets/services/sharp'
+		}
 	},
 });

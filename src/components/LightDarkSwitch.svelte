@@ -8,7 +8,7 @@ import {
 import { onMount } from "svelte";
 import type { LIGHT_DARK_MODE } from "@/types/config";
 
-let mode: LIGHT_DARK_MODE = $state(LIGHT_MODE);
+let mode: LIGHT_DARK_MODE = LIGHT_MODE;
 
 onMount(() => {
 	mode = getStoredTheme();
@@ -212,7 +212,7 @@ function switchScheme(newMode: LIGHT_DARK_MODE) {
 }
 </style>
 
-<div class="z-50">
+<div class="relative z-50">
     <label class="theme-switch">
         <input type="checkbox" class="theme-switch__checkbox" checked={mode === DARK_MODE} onchange={toggleScheme}>
         <div class="theme-switch__container">

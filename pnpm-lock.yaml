@@ -116,9 +116,15 @@ importers:
       remark-directive-rehype:
         specifier: ^0.4.2
         version: 0.4.2
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
       remark-github-admonitions-to-directives:
         specifier: ^1.0.5
         version: 1.0.5
+      remark-mark:
+        specifier: ^0.0.0
+        version: 0.0.0
       remark-math:
         specifier: ^6.0.0
         version: 6.0.0
@@ -4451,6 +4457,9 @@ packages:
 
   remark-github-admonitions-to-directives@1.0.5:
     resolution: {integrity: sha512-MSRzDs51HGbUrHJ0es8POuxwJiUycWw4aYCTN2RZhdOm5UvyqdB8ApWoGBj9QAiPSHKw2HWl1hd5rRzWxVfNew==}
+
+  remark-mark@0.0.0:
+    resolution: {integrity: sha512-B3ssahH0EcrGFf4nn5LFs2UgDNG5imLsm/iuDAojSYeIYC04iAtnZFG6IuIpbUPKzeP9fE2AUzTElgb43oLZJw==}
 
   remark-math@6.0.0:
     resolution: {integrity: sha512-MMqgnP74Igy+S3WwnhQ7kqGlEerTETXMvJhrUzDikVZ2/uogJCb+WHUg97hK9/jcfc0dkD73s3LN8zU49cTEtA==}
@@ -10514,6 +10523,8 @@ snapshots:
       unist-util-visit: 5.0.0
     transitivePeerDependencies:
       - supports-color
+
+  remark-mark@0.0.0: {}
 
   remark-math@6.0.0:
     dependencies:

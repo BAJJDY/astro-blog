@@ -66,20 +66,12 @@
     font-size: 14px;
     color: #666;
   }
-  
-  .ip-info {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #999;
-    text-align: center;
-  }
 </style>
 </head>
 <body>
 
 <div class="content">
  <div class="text">请求携带恶意请求已被拦截</div>
- <div class="ip-info" id="ip-info"></div>
 </div>
 
 <div class="countdown" id="countdown">15秒后将自动返回主页...</div>
@@ -91,263 +83,34 @@
 </div>
 
 <script>
-  // 倒计时功能
-  const countdownElement = document.getElementById('countdown');
-  const BLOCK_SECONDS = 15;
-  const STORAGE_KEY = 'block_countdown_start';
-  
-  // 从localStorage获取开始时间
-  let startTime = localStorage.getItem(STORAGE_KEY);
-  
-  if (!startTime) {
-    // 首次加载，设置开始时间
-    startTime = Date.now();
-    localStorage.setItem(STORAGE_KEY, startTime);
-  } else {
-    // 转换为数字
-    startTime = Number.parseInt(startTime, 10);
-  }
-  
-  // 计算剩余秒数
-  function getRemainingSeconds() {
-    const now = Date.now();
-    const elapsed = Math.floor((now - startTime) / 1000);
-    return Math.max(0, BLOCK_SECONDS - elapsed);
-  }
-  
-  // 更新倒计时显示
-  function updateCountdown() {
-    const remainingSeconds = getRemainingSeconds();
-    countdownElement.textContent = `${remainingSeconds}秒后将自动返回主页...`;
-    
-    if (remainingSeconds <= 0) {
-      // 倒计时结束，清除存储并返回主页
-      localStorage.removeItem(STORAGE_KEY);
-      window.location.href = '/';
-    }
-  }
-  
-  // 初始更新
-  updateCountdown();
-  
-  // 显示IP信息
-  function displayIPInfo() {
-    const ipInfoElement = document.getElementById('ip-info');
-    if (!ipInfoElement) return;
-    
-    try {
-      const ipInfoData = localStorage.getItem('current_ip_info');
-      if (ipInfoData) {
-        const ipInfo = JSON.parse(ipInfoData);
-        ipInfoElement.textContent = `当前IP: ${ipInfo.ip} | 地址: ${ipInfo.location}`;
-      } else {
-        // 如果没有IP信息，尝试从ip.cn获取
-        fetch('https://ip.cn/')
-          .then(response => response.text())
-          .then(text => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, 'text/html');
-            const ipElements = doc.querySelectorAll('p');
-            let ip = '未知';
-            let location = '未知';
-            
-            ipElements.forEach((element, index) => {
-              if (element.textContent.includes('您现在的IP')) {
-                // IP地址在当前元素的下一个兄弟元素中
-                const nextElement = element.nextElementSibling;
-                if (nextElement) {
-                  ip = nextElement.textContent.trim();
-                }
-              } else if (element.textContent.includes('所在地理位置')) {
-                // 地理位置在当前元素的下一个兄弟元素中
-                const nextElement = element.nextElementSibling;
-                if (nextElement) {
-                  location = nextElement.textContent.trim();
-                }
-              }
-            });
-            
-            ipInfoElement.textContent = `当前IP: ${ip} | 地址: ${location}`;
-            // 存储IP信息到localStorage
-            localStorage.setItem('current_ip_info', JSON.stringify({ ip, location }));
-          })
-          .catch(error => {
-            console.error('获取IP信息失败:', error);
-            ipInfoElement.textContent = '当前IP: 未知 | 地址: 未知';
-          });
-      }
-    } catch (e) {
-      console.error('显示IP信息失败:', e);
-      ipInfoElement.textContent = '当前IP: 未知 | 地址: 未知';
-    }
-  }
-  
-  // 调用显示IP信息
-  displayIPInfo();
-  
-  // 每秒更新一次
-  const countdownInterval = setInterval(updateCountdown, 1000);
-  
-  // 禁止右键菜单
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
-  
-  // 高级反调试技术
   (function() {
-    // 方法1: 检测控制台打开（使用更可靠的方法）
-    const checkDevTools = function() {
-      // 检测console对象是否存在且未被修改
-      if (typeof console === 'undefined') {
-        return false;
-      }
-      
-      // 检测console.log是否是函数
-      if (typeof console.log !== 'function') {
-        return true;
-      }
-      
-      // 检测控制台是否打开的方法（更可靠的实现）
-      let devToolsOpen = false;
-      
-      // 保存原始的log方法
-      const originalLog = console.log;
-      
-      // 重写log方法
-      console.log = function(...args) {
-        // 检测调用栈
-        const stack = new Error().stack || '';
-        // 如果调用栈中包含控制台相关的信息，可能是控制台打开了
-        if (stack.includes('console') || stack.includes('Console')) {
-          devToolsOpen = true;
-        }
-        return originalLog.apply(this, args);
-      };
-      
-      // 尝试触发log
-      console.log('');
-      
-      // 恢复原始的log方法
-      console.log = originalLog;
-      
-      return devToolsOpen;
-    };
-    
-    // 方法2: 检测调试器（暂时禁用，避免在性能差的设备上误触发）
-    function detectDebugger() {
-      // 暂时返回false，避免在性能较差的设备上误触发
-      return false;
+    var countdownElement = document.getElementById('countdown');
+    var BLOCK_SECONDS = 15;
+    var STORAGE_KEY = 'block_countdown_start';
+    var startTime = localStorage.getItem(STORAGE_KEY);
+    if (!startTime) {
+      startTime = Date.now();
+      localStorage.setItem(STORAGE_KEY, String(startTime));
+    } else {
+      startTime = Number(startTime);
     }
-    
-    // 方法3: 检测控制台尺寸（使用更可靠的方法，不使用debugger语句）
-    function detectConsoleSize() {
-      // 方法1: 检测窗口外部尺寸与内部尺寸的差异
-      // 只有当差异非常明显时才认为控制台打开
-      const outerWidth = window.outerWidth;
-      const outerHeight = window.outerHeight;
-      const innerWidth = window.innerWidth;
-      const innerHeight = window.innerHeight;
-      
-      // 计算差异比例，而不是绝对数值
-      const widthDiffRatio = Math.abs(outerWidth - innerWidth) / outerWidth;
-      const heightDiffRatio = Math.abs(outerHeight - innerHeight) / outerHeight;
-      
-      // 只有当差异超过30%时才认为控制台打开
-      // 进一步提高阈值，避免在正常触发拦截时误触发黑屏
-      return widthDiffRatio > 0.3 || heightDiffRatio > 0.3;
+    function getRemainingSeconds() {
+      var elapsed = Math.floor((Date.now() - startTime) / 1000);
+      return Math.max(0, BLOCK_SECONDS - elapsed);
     }
-    
-    // 综合检测 - 更严格的检测逻辑，只有当多种方法都检测到控制台打开时才返回true
-    window.detectDevTools = function() {
-      // 方法1: 检查console对象是否被修改
-      const devToolsOpen = checkDevTools();
-      // 方法2: 检查控制台尺寸是否异常
-      const consoleSizeAbnormal = detectConsoleSize();
-      // 只有当两种方法都检测到异常时才认为控制台打开
-      // 这样可以避免在正常触发拦截时误触发黑屏
-      return devToolsOpen && consoleSizeAbnormal;
-    };
+    function updateCountdown() {
+      var remaining = getRemainingSeconds();
+      if (countdownElement) countdownElement.textContent = remaining + '\u79d2\u540e\u5c06\u81ea\u52a8\u8fd4\u56de\u4e3b\u9875...';
+      if (remaining <= 0) {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.href = '/';
+      }
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
   })();
-  
-  // 当检测到控制台打开时的处理函数
-  function handleDevToolsOpen() {
-    // 清除页面内容并显示警告
-    document.body.innerHTML = '';
-    document.body.style.backgroundColor = '#000';
-    document.body.style.color = '#000';
-    document.body.style.userSelect = 'none';
-    
-    // 添加覆盖层并禁用所有交互
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = '#000';
-    overlay.style.color = '#000';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '999999';
-    overlay.style.fontSize = '24px';
-    overlay.style.pointerEvents = 'none';
-    overlay.id = 'devtools-overlay';
-    overlay.textContent = '检测到非法操作，请关闭浏览器后重新访问';
-    
-    // 防止用户移除覆盖层
-    document.body.appendChild(overlay);
-    
-    // 定期检查覆盖层是否被移除
-    setInterval(() => {
-      if (!document.getElementById('devtools-overlay')) {
-        document.body.appendChild(overlay.cloneNode(true));
-      }
-    }, 50);
-    
-    // 禁用所有键盘事件
-    document.addEventListener('keydown', function(e) {
-      e.preventDefault();
-      return false;
-    }, true);
-    
-    // 禁用所有鼠标事件
-    document.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      return false;
-    }, true);
-  }
-  
-  // 定期检查控制台是否打开，但只在正常触发封锁页面时生效
-  // 提高检测频率，确保及时捕获控制台打开事件
-  setInterval(() => {
-    // 检查是否是正常触发的封锁
-    const storageKey = 'r4t3_l1m1t';
-    const encryptedData = localStorage.getItem(storageKey);
-    let isBlocked = false;
-    
-    if (encryptedData) {
-      try {
-        // 解密数据
-        const decrypted = JSON.parse(decodeURIComponent(escape(atob(encryptedData))));
-        const nowSeconds = Math.floor(Date.now() / 1000);
-        isBlocked = typeof decrypted.blockedUntil === 'number' && nowSeconds < decrypted.blockedUntil;
-      } catch (e) {
-        // 静默处理错误
-      }
-    }
-    
-    // 只有在正常触发的封锁时，才启用控制台检测
-    if (isBlocked) {
-      // 连续检测多次，提高灵敏度
-      for (let i = 0; i < 3; i++) {
-        if (window.detectDevTools()) {
-          handleDevToolsOpen();
-          break;
-        }
-      }
-    }
-  }, 200);
 </script>
 
 </body>

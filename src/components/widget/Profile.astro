@@ -1,14 +1,27 @@
 ---
 import { Icon } from "astro-icon/components";
 import { profileConfig } from "../../config";
-import ImageWrapper from "../misc/ImageWrapper.astro";
+import { Image } from "astro:assets";
+
+// 直接导入图片
+import avatar from "../../assets/images/12.png";
 
 const config = profileConfig;
 ---
 <div class="card-base p-3">
     <div class="block relative mx-auto mt-1 lg:mx-0 lg:mt-0 mb-3
        max-w-[12rem] lg:max-w-none overflow-hidden rounded-full user-select-none">
-        <ImageWrapper src={config.avatar || ""} alt="Profile Image of the Author" class="mx-auto lg:w-full h-full lg:mt-0 "></ImageWrapper>
+        <div class="overflow-hidden relative">
+            <Image 
+                src={avatar} 
+                alt="Profile Image of the Author" 
+                class="w-full h-full object-cover mx-auto lg:w-full h-full lg:mt-0"
+                loading="eager"
+                decoding="async"
+                format="webp"
+                quality={85}
+            />
+        </div>
     </div>
     <div class="px-2">
         <div class="font-bold text-xl text-center mb-1 dark:text-neutral-50 transition user-select-none">{config.name}</div>

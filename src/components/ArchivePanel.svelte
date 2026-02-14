@@ -20,7 +20,7 @@ interface Post {
 		title: string;
 		tags: string[];
 		category?: string | null;
-		published: Date;
+		published: Date | string; // 支持 Date 或 ISO 字符串
 	};
 }
 
@@ -31,14 +31,12 @@ interface Group {
 
 let groups: Group[] = [];
 
-function formatDate(date: Date) {
-	const month = (date.getMonth() + 1).toString().padStart(2, "0");
-	const day = date.getDate().toString().padStart(2, "0");
+function formatDate(date: Date | string) {
+	// 如果是字符串，转换为 Date 对象
+	const dateObj = typeof date === "string" ? new Date(date) : date;
+	const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+	const day = dateObj.getDate().toString().padStart(2, "0");
 	return `${month}-${day}`;
-}
-
-function formatTag(tagList: string[]) {
-	return tagList.map((t) => `#${t}`).join(" ");
 }
 
 onMount(async () => {
@@ -64,7 +62,12 @@ onMount(async () => {
 
 	const grouped = filteredPosts.reduce(
 		(acc, post) => {
-			const year = post.data.published.getFullYear();
+			// 确保 published 是 Date 对象
+			const publishedDate =
+				typeof post.data.published === "string"
+					? new Date(post.data.published)
+					: post.data.published;
+			const year = publishedDate.getFullYear();
 			if (!acc[year]) {
 				acc[year] = [];
 			}
@@ -85,7 +88,7 @@ onMount(async () => {
 });
 </script>
 
-<div class="card-base px-8 py-6">
+<div class="card-base px-8 py-6 w-full">
     {#each groups as group}
         <div>
             <div class="flex flex-row w-full items-center h-[3.75rem]">
@@ -136,13 +139,7 @@ onMount(async () => {
                             {post.data.title}
                         </div>
 
-                        <!-- tag list -->
-                        <div
-                                class="hidden md:block md:w-[15%] text-left text-sm transition
-                     whitespace-nowrap overflow-ellipsis overflow-hidden text-30"
-                        >
-                            {formatTag(post.data.tags)}
-                        </div>
+
                     </div>
                 </a>
             {/each}

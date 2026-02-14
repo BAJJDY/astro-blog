@@ -46,8 +46,29 @@ if (isLocal) {
 
 const imageClass = "w-full h-full object-cover";
 const imageStyle = `object-position: ${position}`;
+
+// 判断是否为首屏图片（banner 或 profile）
+const isPriority =
+	id === "banner" || id === "post-cover" || className?.includes("profile");
 ---
 <div id={id} class:list={[className, 'overflow-hidden relative']}>
-    {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} loading="lazy" decoding="async"/>}
-    {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle} loading="lazy" decoding="async"/>}
+    {isLocal && img && <Image 
+        src={img} 
+        alt={alt || ""} 
+        class={imageClass} 
+        style={imageStyle} 
+        loading={isPriority ? "eager" : "lazy"} 
+        decoding="async"
+        format="webp"
+        quality={85}
+    />}
+    {!isLocal && <img 
+        src={isPublic ? url(src) : src} 
+        alt={alt || ""} 
+        class={imageClass} 
+        style={imageStyle} 
+        loading={isPriority ? "eager" : "lazy"} 
+        decoding="async"
+        fetchpriority={isPriority ? "high" : "auto"}
+    />}
 </div>

@@ -6,15 +6,69 @@ import { url } from "../utils/url-utils";
 const currentYear = new Date().getFullYear();
 ---
 
-<!--<div class="border-t border-[var(&#45;&#45;primary)] mx-16 border-dashed py-8 max-w-[var(&#45;&#45;page-width)] flex flex-col items-center justify-center px-6">-->
-<div class="transition border-t border-black/10 dark:border-white/15 my-10 border-dashed mx-32"></div>
-<!--<div class="transition bg-[oklch(92%_0.01_var(&#45;&#45;hue))] dark:bg-black rounded-2xl py-8 mt-4 mb-8 flex flex-col items-center justify-center px-6">-->
-<div class="transition border-dashed border-[oklch(85%_0.01_var(--hue))] dark:border-white/15 rounded-2xl mb-12 flex flex-col items-center justify-center px-6">
-    <div class="transition text-50 text-sm text-center user-select-none">
-        &copy; <span id="copyright-year">{currentYear}</span> {profileConfig.name} 版权所有。 /
-        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('rss.xml')}>RSS</a><br>
-        由
-        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://astro.build">Astro</a> 和
-        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a> 提供支持
+<div class="footer-wrapper">
+    <!-- 第一行：版权与订阅 -->
+    <div class="footer-text text-primary flex items-center">
+        <span class="font-medium">© {currentYear} {profileConfig.name} 版权所有</span>
+        <span class="slash-decoration">/</span>
+        <a href={url('rss.xml')} class="link-item">RSS</a>
+    </div>
+
+    <!-- 第二行：驱动支持 -->
+    <div class="footer-text text-secondary row-spacing">
+        <span>由</span>
+        <a href="https://astro.build" target="_blank" class="link-item !text-slate-600">Astro</a>
+        <span>和</span>
+        <a href="https://github.com/saicaca/fuwari" target="_blank" class="link-item !text-slate-600">Fuwari</a>
+        <span>驱动</span>
     </div>
 </div>
+
+<style>
+    /* 整体容器 */
+    .footer-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        padding: 1rem;
+    }
+
+    /* 基础文字样式 */
+    .footer-text {
+        font-size: 13.5px;
+        letter-spacing: 0.01em;
+        line-height: 1.5;
+    }
+
+    /* 颜色层级 */
+    .text-primary { color: #334155; }
+    .text-secondary { color: #94a3b8; }
+
+    /* 链接 UI 设计 */
+    .link-item {
+        color: #3b82f6;
+        font-weight: 500;
+        padding: 0 2px;
+        transition: all 0.2s ease;
+    }
+
+    .link-item:hover {
+        color: #2563eb;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+
+    /* 斜杠装饰：极简处理 */
+    .slash-decoration {
+        margin: 0 8px;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    /* 紧凑的行间距控制 */
+    .row-spacing {
+        margin-top: 0.25rem;
+    }
+</style>

@@ -85,8 +85,7 @@ export async function getCategoryList(): Promise<Category[]> {
 	const count: { [key: string]: number } = {};
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
 		if (!post.data.category) {
-			const ucKey = i18n(I18nKey.uncategorized);
-			count[ucKey] = count[ucKey] ? count[ucKey] + 1 : 1;
+			// Skip posts without category to avoid "uncategorized" category
 			return;
 		}
 

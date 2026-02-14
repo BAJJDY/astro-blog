@@ -14,7 +14,7 @@ import rehypeSlug from "rehype-slug";
 import remarkDirective from "remark-directive"; /* Handle directives */
 import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-directives";
 import remarkGfm from "remark-gfm"; /* GitHub Flavored Markdown support, including ==mark== syntax */
-import remarkMark from "remark-mark"; /* Handle ==mark== syntax */
+
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
 import { expressiveCodeConfig } from "./src/config.ts";
@@ -109,16 +109,15 @@ export default defineConfig({
 	],
 	markdown: {
 		remarkPlugins: [
-			remarkGfm,
-			remarkMark,
-			remarkMath,
-			remarkReadingTime,
-			remarkExcerpt,
-			remarkGithubAdmonitionsToDirectives,
-			remarkDirective,
-			remarkSectionize,
-			parseDirectiveNode,
-		],
+		remarkGfm,
+		remarkMath,
+		remarkReadingTime,
+		remarkExcerpt,
+		remarkGithubAdmonitionsToDirectives,
+		remarkDirective,
+		remarkSectionize,
+		parseDirectiveNode,
+	],
 		gfm: true,
 		rehypePlugins: [
 			rehypeKatex,

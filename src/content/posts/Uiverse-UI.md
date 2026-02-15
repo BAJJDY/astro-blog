@@ -1,4 +1,4 @@
----
+﻿---
 title: Uiverse一个开源 UI 组件
 description: 一个拥有数千个免费 UI 组件的开源生态，支持直接复制 HTML/CSS 使用。
 published: 2026-02-14
@@ -10,7 +10,9 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
 
 ![UI组件](/post-images/ui.png)
 
+:::tip[提示]
 访问 [Uiverse 官网](https://uiverse.io/) 了解更多。
+:::
 
 - Buttons  
 - Cards  
@@ -21,11 +23,19 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
 
 所有组件均可自由使用，并支持商业项目。
 
+:::note[说明]
+所有 Uiverse 组件都是开源的，可以免费用于个人和商业项目。
+:::
+
 ---
 
 ## 展示 Uiverse UI
 
-下面展示 UIverse 的 UI 库中的组件，<mark>点击或靠近</mark>：
+下面展示 UIverse 的 UI 库中的组件，<mark class="highlight-half">点击或靠近</mark>：
+
+:::tip[使用方法]
+这些组件可以直接复制 HTML 和 CSS 代码到你的项目中使用。
+:::
 
 ---
 
@@ -33,7 +43,7 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
   <!-- Torch Checkbox -->
   <div style="display: flex; flex-direction: column; align-items: center;">
     <label class="container">
-      <div class="simple-text">Click me!</div>
+      <div class="simple-text">点击我！</div>
       <input checked="checked" type="checkbox" />
       <div class="checkmark"></div>
       <div class="torch">
@@ -125,6 +135,44 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
 </div>
 
 <style>
+/* 马克笔效果 - 只涂一半，从左到右动画 */
+.highlight-half {
+  position: relative;
+  display: inline-block;
+  color: var(--text-color, #1a1a1a);
+  background: transparent;
+  padding: 0;
+  z-index: 1;
+}
+
+.highlight-half::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 50%;
+  background: #ffd700;
+  z-index: -1;
+  animation: highlightSweep 1.2s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes highlightSweep {
+  to {
+    width: 100%;
+  }
+}
+
+/* 确保文字在亮色和暗色模式下都可见 */
+:root {
+  --text-color: #1a1a1a;
+}
+
+:root.dark {
+  --text-color: #e5e5e5;
+}
+
 /* From Uiverse.io by KSAplay */ 
 .container input {
   position: absolute;
@@ -148,7 +196,7 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
   bottom: -40px;
   width: 120px;
   text-align: center;
-  color: white;
+  color: var(--text-color, #1a1a1a);
   font-size: 16pt;
   font-weight: 800;
   font-family: monospace;
@@ -592,6 +640,38 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
 ### 🚀 极快的开发速度
 无需设计 UI，复制即可用。
 
+```html title="示例：Uiverse 点赞按钮 (HTML + Tailwind CSS)" {2-4,15-17}
+<!-- From Uiverse.io by lvloper -->
+<div class="overflow-x-visible relative w-14 h-14 overflow-y-clip group text-center">
+  <div class="flex justify-center items-center w-14 h-14 rounded-full bg-yellow-300 
+       transition-all duration-300 absolute top-0 group-hover:scale-[.60] 
+       group-hover:origin-top text-white">
+    <svg xmlns="http://www.w3.org/2000/svg" width="26.463" height="26.647" 
+         viewBox="0 0 26.463 26.647">
+      <g id="Grupo_3793" data-name="Grupo 3793" transform="translate(1.5 1.5)">
+        <path id="Trazado_28219" data-name="Trazado 28219" 
+              d="M7,10V24.188" transform="translate(-1.088 -0.541)" 
+              fill="none" stroke="#000" stroke-linecap="round" 
+              stroke-linejoin="round" stroke-width="3"></path>
+        <path id="Trazado_28220" data-name="Trazado 28220" 
+              d="M17.37,6.587l-1.182,4.871h6.893a2.365,2.365,0,0,1,2.27,3.027L22.6,23.944a2.365,2.365,0,0,1-2.27,1.7H4.365A2.365,2.365,0,0,1,2,23.282V13.823a2.365,2.365,0,0,1,2.365-2.365H7.628a2.365,2.365,0,0,0,2.116-1.312L13.823,2A3.7,3.7,0,0,1,17.37,6.587Z" 
+              transform="translate(-2 -2)" fill="none" stroke="#000" 
+              stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+      </g>
+    </svg>
+  </div>
+  <div class="absolute text-white font-bold -bottom-10 left-1/2 text-sm 
+       text-center text-black whitespace-nowrap transition-all duration-300 
+       transform -translate-x-1/2 group-hover:bottom-0">
+    Like
+  </div>
+</div>
+```
+
+:::tip[💡 提示]
+这个按钮使用 Tailwind CSS，鼠标悬停时会有缩放和文字显示动画。
+:::
+
 ### 🎨 社区设计质量高
 很多组件达到 Dribbble 水准。
 
@@ -603,11 +683,32 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
 - 调整结构
 - 甚至二次封装成组件
 
+```js title="封装成 React 组件" ins={1-3} del={8}
+// 将 Uiverse 组件封装成可复用的 React 组件
+import React from 'react';
+import './button.css';
+
+export function UiButton({ children, onClick }) {
+  return (
+    <button className="ui-button" onClick={onClick}>
+      // 这是旧的实现
+      {children}
+    </button>
+  );
+}
+```
+
+:::important[重要]
+记得在使用前检查组件的浏览器兼容性，某些高级 CSS 特性可能需要 polyfill。
+:::
+
 ---
 
 ## 建议使用方式
 
-不要直接复制几十个组件。
+:::warning[警告]
+不要直接复制几十个组件，这会导致风格混乱。
+:::
 
 正确姿势：
 
@@ -615,9 +716,26 @@ Uiverse 是一个**社区驱动的 UI 组件库**，提供大量界面元素：
 - 统一颜色体系  
 - 做成自己的 UI 规范  
 
+```css title="统一颜色变量" mark={1-5}
+:root {
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
+  --text-color: #2d3748;
+}
+
+/* 在所有 Uiverse 组件中使用这些变量 */
+.ui-button {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+}
+```
+
 否则网站会变成：
 
-> “组件拼装怪”
+:::caution[注意]
+风格不统一会让网站看起来很混乱，像个"组件拼装怪"。
+:::
 
 ---
 

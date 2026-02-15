@@ -191,9 +191,31 @@ article mark,
   transition: background-size 1s cubic-bezier(0.19, 1, 0.22, 1) !important;
 }
 
+/* 暗黑模式下的 mark 标签样式 */
+.dark :root mark,
+.dark article mark,
+.dark .custom-md mark {
+  background-image: linear-gradient(to right, #ffcf33 0%, #ffdf70 100%) !important;
+  color: #333 !important;
+}
+
 /* 当 mark 标签获得 .animate 类时触发涂抹 */
 :root mark.animate,
 article mark.animate,
 .custom-md mark.animate {
-  background-size: 100% 80% !important;
+  background-size: 50% 80% !important;
+  background-position: 0 90% !important;
+  animation: mark-paint 1.5s ease-out forwards !important;
+}
+
+/* 马克笔涂抹动画 */
+@keyframes mark-paint {
+  0% {
+    background-size: 0% 80% !important;
+    background-position: left 90% !important;
+  }
+  100% {
+    background-size: 50% 80% !important;
+    background-position: left 90% !important;
+  }
 }

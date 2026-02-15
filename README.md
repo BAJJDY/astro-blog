@@ -97,7 +97,7 @@ export const siteConfig: SiteConfig = {
   },
   banner: {
     enable: false,
-    src: "assets/images/demo-banner.png",
+    src: "assets/images/12.png",
     position: "center",
   },
   favicon: [
@@ -115,7 +115,7 @@ export const siteConfig: SiteConfig = {
 ```markdown
 ---
 title: 文章标题
-published: 2024-01-01
+published: 2026-02-10
 description: 文章描述
 image: ./cover.jpg
 tags: [标签1, 标签2]
@@ -153,7 +153,7 @@ draft: false
 
 ```typescript
 themeColor: {
-  hue: 250,        // 主色调 (0-360)
+  hue: 260,        // 主色调 (0-360)
   fixed: false,    // 是否固定颜色
 }
 ```

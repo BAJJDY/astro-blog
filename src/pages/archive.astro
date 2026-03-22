@@ -1,30 +1,131 @@
 ---
-import ArchivePanel from "@components/ArchivePanel.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getSortedPostsList } from "../utils/content-utils";
+import type { PostForList } from "../utils/content-utils";
+import { getPostUrlBySlug } from "../utils/url-utils";
 
 const sortedPostsList = await getSortedPostsList();
 
-// 将 Date 对象转换为 ISO 字符串，以便正确传递给 Svelte 组件
-const serializedPosts = sortedPostsList.map((post) => ({
-	...post,
-	data: {
-		...post.data,
-		published:
-			post.data.published instanceof Date
-				? post.data.published.toISOString()
-				: post.data.published,
-		updated:
-			post.data.updated instanceof Date
-				? post.data.updated?.toISOString()
-				: post.data.updated,
-	},
-}));
+const searchParams = Astro.url.searchParams;
+const activeTags = searchParams
+	.getAll("tag")
+	.map((value) => value.trim())
+	.filter(Boolean);
+const activeCategories = searchParams
+	.getAll("category")
+	.map((value) => value.trim())
+	.filter(Boolean);
+const uncategorized = searchParams.has("uncategorized");
+
+const filteredPosts = sortedPostsList.filter((post) => {
+	const postTags = Array.isArray(post.data.tags) ? post.data.tags : [];
+	const postCategory =
+		typeof post.data.category === "string" ? post.data.category.trim() : "";
+
+	if (
+		activeTags.length > 0 &&
+		!postTags.some((tag) => activeTags.includes(tag))
+	) {
+		return false;
+	}
+
+	if (
+		activeCategories.length > 0 &&
+		(!postCategory || !activeCategories.includes(postCategory))
+	) {
+		return false;
+	}
+
+	if (uncategorized && postCategory) {
+		return false;
+	}
+
+	return true;
+});
+
+type ArchiveGroup = {
+	year: number;
+	posts: PostForList[];
+};
+
+const groupedMap = new Map<number, PostForList[]>();
+for (const post of filteredPosts) {
+	const year = new Date(post.data.published).getFullYear();
+	if (!groupedMap.has(year)) {
+		groupedMap.set(year, []);
+	}
+	groupedMap.get(year)?.push(post);
+}
+
+const groups: ArchiveGroup[] = [...groupedMap.entries()]
+	.sort((a, b) => b[0] - a[0])
+	.map(([year, posts]) => ({ year, posts }));
+
+const formatDate = (date: Date) => {
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${month}-${day}`;
+};
 ---
 
 <MainGridLayout title={i18n(I18nKey.archive)}>
-    <ArchivePanel tags={[]} categories={[]} sortedPosts={serializedPosts} client:only="svelte"></ArchivePanel>
-</MainGridLayout>
+	<h1 class="sr-only">{i18n(I18nKey.archive)}</h1>
+	<div class="card-base px-8 py-6 w-full">
+		{groups.map((group) => (
+			<div>
+				<div class="flex flex-row w-full items-center h-[3.75rem]">
+					<div class="w-[15%] md:w-[10%] transition text-2xl font-bold text-right text-75">
+						{group.year}
+					</div>
+					<div class="w-[15%] md:w-[10%]">
+						<div
+							class="h-3 w-3 bg-none rounded-full outline outline-[var(--primary)] mx-auto
+                  -outline-offset-[2px] z-50 outline-3"
+						/>
+					</div>
+					<div class="w-[70%] md:w-[80%] transition text-left text-50">
+						{group.posts.length}{" "}
+						{i18n(
+							group.posts.length === 1 ? I18nKey.postCount : I18nKey.postsCount,
+						)}
+					</div>
+				</div>
 
+				{group.posts.map((post) => (
+					<a
+						href={getPostUrlBySlug(post.slug)}
+						aria-label={post.data.title}
+						class="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
+					>
+						<div class="flex flex-row justify-start items-center h-full">
+							<div class="w-[15%] md:w-[10%] transition text-sm text-right text-50">
+								{formatDate(new Date(post.data.published))}
+							</div>
+
+							<div class="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">
+								<div
+									class="transition-all mx-auto w-1 h-1 rounded group-hover:h-5
+                       bg-[oklch(0.5_0.05_var(--hue))] group-hover:bg-[var(--primary)]
+                       outline outline-4 z-50
+                       outline-[var(--card-bg)]
+                       group-hover:outline-[var(--btn-plain-bg-hover)]
+                       group-active:outline-[var(--btn-plain-bg-active)]"
+								/>
+							</div>
+
+							<div
+								class="w-[70%] md:max-w-[65%] md:w-[65%] text-left font-bold
+                     group-hover:translate-x-1 transition-all group-hover:text-[var(--primary)]
+                     text-75 pr-8 whitespace-nowrap overflow-ellipsis overflow-hidden"
+							>
+								{post.data.title}
+							</div>
+						</div>
+					</a>
+				))}
+			</div>
+		))}
+	</div>
+</MainGridLayout>

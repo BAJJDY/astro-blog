@@ -24,6 +24,17 @@ const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
+const now = new Date();
+const lastModified =
+	entry.data.updated && entry.data.updated > entry.data.published
+		? entry.data.updated
+		: entry.data.published;
+const staleDays = Math.floor(
+	(now.getTime() - lastModified.getTime()) / (1000 * 60 * 60 * 24),
+);
+const showStaleNotice = staleDays >= 30;
+const staleTitle = `\u6700\u540e\u66f4\u65b0\u4e8e ${formatDateToYYYYMMDD(lastModified)}\uff0c\u8ddd\u4eca\u5df2\u8fc7 ${staleDays} \u5929`;
+const staleDesc = "\u90e8\u5206\u5185\u5bb9\u53ef\u80fd\u5df2\u8fc7\u65f6";
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -50,26 +61,22 @@ const jsonLd = {
             {}
         ]}>
             <!-- word count and reading time -->
-            <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
-                <div class="flex flex-row items-center">
-                    <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
-                        <Icon name="material-symbols:notes-rounded"></Icon>
-                    </div>
-                    <div class="text-sm">{remarkPluginFrontmatter.words} {" " + i18n(I18nKey.wordsCount)}</div>
+            <div class="flex flex-wrap gap-2 mb-3 transition onload-animation text-black/70 dark:text-white/75">
+                <div class="inline-flex items-center rounded-lg px-2 py-1 bg-white/60 dark:bg-black/35 backdrop-blur-sm">
+                    <Icon name="material-symbols:notes-rounded" class="text-[0.95rem] text-[var(--primary)] mr-1"></Icon>
+                    <span class="text-sm">{remarkPluginFrontmatter.words} {" " + i18n(I18nKey.wordsCount)}</span>
                 </div>
-                <div class="flex flex-row items-center">
-                    <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
-                        <Icon name="material-symbols:schedule-outline-rounded"></Icon>
-                    </div>
-                    <div class="text-sm">
+                <div class="inline-flex items-center rounded-lg px-2 py-1 bg-white/60 dark:bg-black/35 backdrop-blur-sm">
+                    <Icon name="material-symbols:schedule-outline-rounded" class="text-[0.95rem] text-[var(--primary)] mr-1"></Icon>
+                    <span class="text-sm">
                         {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
-                    </div>
+                    </span>
                 </div>
             </div>
 
             <!-- title -->
             <div class="relative onload-animation">
-                <div
+                <h1
                     data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
                     class="transition w-full block font-bold mb-3
                     text-3xl md:text-[2.25rem]/[2.75rem]
@@ -78,7 +85,7 @@ const jsonLd = {
                     before:absolute before:top-[0.75rem] before:left-[-1.125rem]
                 ">
                     {entry.data.title}
-                </div>
+                </h1>
             </div>
 
             <!-- metadata -->
@@ -93,6 +100,23 @@ const jsonLd = {
                 <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>
             </div>
 
+            {showStaleNotice && (
+                <div class="mb-5 onload-animation rounded-xl px-4 py-3 bg-[oklch(0.97_0.02_var(--hue))] dark:bg-[oklch(0.28_0.03_var(--hue))] border border-[oklch(0.84_0.08_var(--hue))]/40">
+                    <div class="flex items-start gap-3">
+                        <div class="h-8 w-8 rounded-full inline-flex items-center justify-center bg-white/70 dark:bg-black/30 text-[var(--primary)] shrink-0 mt-0.5">
+                            <Icon name="material-symbols:history-rounded" class="text-[0.98rem]"></Icon>
+                        </div>
+                        <div>
+                            <div class="text-base font-medium text-black/80 dark:text-white/85 leading-snug">
+                                {staleTitle}
+                            </div>
+                            <div class="text-xs text-black/58 dark:text-white/62 mt-0.5">
+                                {staleDesc}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <Markdown class="mb-6 markdown-content onload-animation">
                 <Content />

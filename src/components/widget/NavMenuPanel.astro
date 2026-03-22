@@ -8,15 +8,31 @@ interface Props {
 }
 
 const links = Astro.props.links;
+
+const getNavIcon = (link: NavBarLink): string => {
+	const raw = (link.url || "").toLowerCase();
+	if (raw === "/" || raw === "") return "material-symbols:home-outline-rounded";
+	if (raw.includes("archive")) return "material-symbols:archive-outline-rounded";
+	if (raw.includes("posts")) return "material-symbols:article-outline-rounded";
+	if (raw.includes("about")) return "material-symbols:person-outline-rounded";
+	return "material-symbols:bookmarks-outline-rounded";
+};
 ---
-<div id="nav-menu-panel" class:list={["float-panel float-panel-closed absolute transition-all fixed right-4 px-2 py-2"]}>
+<div
+	id="nav-menu-panel"
+	class:list={[
+		"float-panel float-panel-closed fixed transition-all z-[60]",
+		"top-[5.25rem] left-3 right-3 sm:left-auto sm:right-4 sm:w-72 px-2 py-2",
+	]}
+>
     {links.map((link) => (
-        <a href={link.external ? link.url : url(link.url)} class="group flex justify-between items-center py-2 pl-3 pr-1 rounded-lg gap-8
+        <a href={link.external ? link.url : url(link.url)} class="group flex justify-between items-center py-2.5 pl-3 pr-2 rounded-lg gap-8
             hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition
         "
            target={link.external ? "_blank" : null}
         >
-            <div class="transition text-black/75 dark:text-white/75 font-bold group-hover:text-[var(--primary)] group-active:text-[var(--primary)]">
+            <div class="transition text-black/75 dark:text-white/75 font-bold group-hover:text-[var(--primary)] group-active:text-[var(--primary)] inline-flex items-center gap-2">
+                <Icon name={getNavIcon(link)} class="text-[1.05rem]"></Icon>
                 {link.name}
             </div>
             {!link.external && <Icon name="material-symbols:chevron-right-rounded"

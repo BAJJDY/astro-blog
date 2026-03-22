@@ -54,6 +54,11 @@ if (title) {
 	pageTitle = `${siteConfig.title} - ${siteConfig.subtitle}`;
 }
 
+const linkConfirmTitle = "\u5728\u65b0\u6807\u7b7e\u9875\u6253\u5f00\u6b64\u94fe\u63a5\uff1f";
+const linkConfirmDesc = "\u8be5\u94fe\u63a5\u5c06\u4ee5\u65b0\u9875\u9762\u6253\u5f00\u3002";
+const linkConfirmOpen = "\u6253\u5f00";
+const linkConfirmCancel = "\u53d6\u6d88";
+
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
 
@@ -73,7 +78,7 @@ const bannerOffset =
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+<html lang={siteLang} class="bg-[var(--page-bg)] text-[14px] md:text-[16px]"
 	  data-overlayscrollbars-initialize
 >
 	<head>
@@ -141,6 +146,12 @@ const bannerOffset =
 			let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
 			offset = offset - offset % 4;
 			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+
+            // Apply cached wallpaper before page paint to reduce flashing.
+            const cachedBg = localStorage.getItem("global_bing_current_v4");
+            if (cachedBg) {
+                document.documentElement.style.setProperty("--site-bg-image", `url("${cachedBg}")`);
+            }
 		</script>
 		<style define:vars={{
 			configHue,
@@ -160,7 +171,7 @@ const bannerOffset =
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
 	</head>
-	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
+	<body class="min-h-screen" class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		data-overlayscrollbars-initialize
 		style={isHomePage ? "user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;" : ""}
 	>
@@ -168,10 +179,89 @@ const bannerOffset =
 		<ConfigCarrier></ConfigCarrier>
 		<slot />
 
+		<div id="link-confirm-overlay" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/35 px-4">
+			<div class="bg-gray-100 max-w-sm w-full mx-auto rounded shadow-md">
+				<div class="text-center p-6">
+					<p id="link-confirm-title" class="text-lg font-bold mb-0">{linkConfirmTitle}</p>
+					<p id="link-confirm-message" class="text-sm mb-0 break-all">{linkConfirmDesc}</p>
+				</div>
+				<div class="border-t border-gray-300 flex justify-center p-0">
+					<div class="flex-1 text-center">
+						<button id="link-confirm-allow"
+							class="text-blue-600 hover:bg-white hover:rounded-bl-md w-full py-2"
+							type="button"
+						>
+							{linkConfirmOpen}
+						</button>
+					</div>
+					<div class="border-l border-gray-300"></div>
+					<div class="flex-1 text-center">
+						<button id="link-confirm-cancel"
+							class="text-blue-600 font-bold hover:bg-white hover:rounded-br-md w-full py-2"
+							type="button"
+						>
+							{linkConfirmCancel}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
 
 		<script defer src="/scripts/rate-limit.js"></script>
+		<script is:inline>
+			document.addEventListener("dragstart", (event) => {
+				if (event.target instanceof HTMLImageElement) {
+					event.preventDefault();
+				}
+			});
+		</script>
+        <script is:inline>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const usedKey = "global_bing_used_v4";
+            const currentKey = "global_bing_current_v4";
+
+            const applyBackground = (imageUrl) => {
+                if (!imageUrl) return;
+                const img = new Image();
+                img.decoding = "async";
+                img.onload = () => {
+                    document.documentElement.style.setProperty("--site-bg-image", `url("${imageUrl}")`);
+                };
+                img.src = imageUrl;
+            };
+
+            try {
+                const current = localStorage.getItem(currentKey);
+                if (current) {
+                    applyBackground(current);
+                }
+
+                const res = await fetch("/api/bing-wallpaper?v=4");
+                const data = await res.json();
+                if (!data.images || data.images.length === 0) return;
+
+                let used = JSON.parse(localStorage.getItem(usedKey) || "[]");
+                let unused = data.images.filter((imageUrl) => !used.includes(imageUrl));
+
+                if (unused.length === 0) {
+                    used = [];
+                    unused = data.images;
+                }
+
+                const selected = unused[Math.floor(Math.random() * unused.length)];
+                if (!selected) return;
+
+                localStorage.setItem(currentKey, selected);
+                used.push(selected);
+                localStorage.setItem(usedKey, JSON.stringify(used));
+                applyBackground(selected);
+            } catch (e) {
+                console.error("Failed to load Bing wallpaper:", e);
+            }
+        });
+        </script>
 		{isHomePage && <script is:inline>
 			document.addEventListener('contextmenu', function(e) {
 				e.preventDefault();
@@ -218,404 +308,6 @@ const bannerOffset =
 }
 </style>
 
-<script defer type="module">
-import 'overlayscrollbars/overlayscrollbars.css';
-import {
-	OverlayScrollbars,
-	// ScrollbarsHidingPlugin,
-	// SizeObserverPlugin,
-	// ClickScrollPlugin
-} from 'overlayscrollbars';
-import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
-import {pathsEqual, url} from "../utils/url-utils";
-import {
-	BANNER_HEIGHT,
-	BANNER_HEIGHT_HOME,
-	BANNER_HEIGHT_EXTEND,
-	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
-} from "../constants/constants";
-import { siteConfig } from '../config';
-
-/* Preload fonts */
-// (async function() {
-// 	try {
-// 		await Promise.all([
-// 			document.fonts.load("400 1em Roboto"),
-// 			document.fonts.load("700 1em Roboto"),
-// 		]);
-// 		document.body.classList.remove("hidden");
-// 	} catch (error) {
-// 		console.log("Failed to load fonts:", error);
-// 	}
-// })();
-
-/* Theme transition optimization */
-function optimizeThemeTransition() {
-	// Add a temporary overlay to smooth theme transitions
-	const overlay = document.createElement('div');
-	overlay.style.position = 'fixed';
-	overlay.style.top = '0';
-	overlay.style.left = '0';
-	overlay.style.width = '100%';
-	overlay.style.height = '100%';
-	overlay.style.background = 'currentColor';
-	overlay.style.zIndex = '9999';
-	overlay.style.pointerEvents = 'none';
-	overlay.style.transition = 'opacity 0.2s ease-in-out';
-	overlay.style.opacity = '0';
-	document.body.appendChild(overlay);
-
-	// Force repaint
-	void overlay.offsetWidth;
-
-	// Remove overlay after a short delay
-	setTimeout(() => {
-		overlay.style.opacity = '0';
-		setTimeout(() => {
-			document.body.removeChild(overlay);
-		}, 200);
-	}, 10);
-}
-
-// Call the function to optimize theme transitions
-optimizeThemeTransition();
-
-const bannerEnabled = !!document.getElementById('banner-wrapper')
-
-function setClickOutsideToClose(panel, ignores) {
-	document.addEventListener("click", event => {
-		let panelDom = document.getElementById(panel);
-		let tDom = event.target;
-		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
-		for (let ig of ignores) {
-			let ie = document.getElementById(ig)
-			if (ie == tDom || (ie?.contains(tDom))) {
-				return;
-			}
-	}
-	if (panelDom) {
-		panelDom.classList.add("float-panel-closed");
-	}
-	});
-}
-setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
-setClickOutsideToClose("nav-menu-panel", ["nav-menu-panel", "nav-menu-switch"])
-setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-switch"])
-
-
-function loadTheme() {
-	const theme = getStoredTheme()
-	setTheme(theme)
-}
-
-function loadHue() {
-	setHue(getHue())
-}
-
-function initCustomScrollbar() {
-	const bodyElement = document.querySelector('body');
-	if (!bodyElement) return;
-	OverlayScrollbars(
-		// docs say that a initialization to the body element would affect native functionality like window.scrollTo
-		// but just leave it here for now
-		{
-			target: bodyElement,
-			cancel: {
-				nativeScrollbarsOverlaid: true,    // don't initialize the overlay scrollbar if there is a native one
-			}
-		}, {
-		scrollbars: {
-			theme: 'scrollbar-base scrollbar-auto py-1',
-			visibility: 'hidden',
-			autoHide: 'never',
-		},
-		sizeAutoCapable: true,
-	});
-
-	const katexElements = document.querySelectorAll('.katex-display');
-
-	const katexObserverOptions = {
-		root: null,
-		rootMargin: '100px',
-		threshold: 0.1
-	};
-
-	const processKatexElement = (element) => {
-		if (!element.parentNode) return;
-		if (element.hasAttribute('data-scrollbar-initialized')) return;
-
-		const container = document.createElement('div');
-		container.className = 'katex-display-container';
-		container.setAttribute('aria-label', 'scrollable container for formulas');
-
-		element.parentNode.insertBefore(container, element);
-		container.appendChild(element);
-
-		OverlayScrollbars(container, {
-			scrollbars: {
-				theme: 'scrollbar-base scrollbar-auto',
-				autoHide: 'leave',
-				autoHideDelay: 500,
-				autoHideSuspend: false
-			}
-		});
-
-		element.setAttribute('data-scrollbar-initialized', 'true');
-	};
-
-	const katexObserver = new IntersectionObserver((entries, observer) => {
-		entries.forEach(entry => {
-			if (entry.isIntersecting) {
-			processKatexElement(entry.target);
-			observer.unobserve(entry.target);
-			}
-		});
-	}, katexObserverOptions);
-
-	katexElements.forEach(element => {
-		katexObserver.observe(element);
-	});
-}
-
-function showBanner() {
-	if (!siteConfig.banner.enable) return;
-
-	const banner = document.getElementById('banner');
-	if (!banner) {
-		console.error('Banner element not found');
-		return;
-	}
-
-	banner.classList.remove('opacity-0', 'scale-105');
-}
-
-function init() {
-	// disableAnimation()()		// TODO
-	loadTheme();
-	loadHue();
-	initCustomScrollbar();
-	showBanner();
-}
-
-/* Load settings when entering the site */
-init();
-
-const setup = () => {
-	// TODO: temp solution to change the height of the banner
-/*
-	window.swup.hooks.on('animation:out:start', () => {
-		const path = window.location.pathname
-		const body = document.querySelector('body')
-		if (path[path.length - 1] === '/' && !body.classList.contains('is-home')) {
-			body.classList.add('is-home')
-		} else if (path[path.length - 1] !== '/' && body.classList.contains('is-home')) {
-			body.classList.remove('is-home')
-		}
-	})
-*/
-	window.swup.hooks.on('link:click', () => {
-		// Remove the delay for the first time page load
-		document.documentElement.style.setProperty('--content-delay', '0ms')
-
-		// prevent elements from overlapping the navbar
-		if (!bannerEnabled) {
-			return
-		}
-		let threshold = window.innerHeight * (BANNER_HEIGHT / 100) - 72 - 16
-		let navbar = document.getElementById('navbar-wrapper')
-		if (!navbar || !document.body.classList.contains('lg:is-home')) {
-			return
-		}
-		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
-			navbar.classList.add('navbar-hidden')
-		}
-	})
-	window.swup.hooks.on('content:replace', initCustomScrollbar)
-	window.swup.hooks.on('visit:start', (visit) => {
-		// change banner height immediately when a link is clicked
-		const bodyElement = document.querySelector('body')
-		if (bodyElement && pathsEqual(visit.to.url, url('/'))) {
-			bodyElement.classList.add('lg:is-home');
-		} else if (bodyElement) {
-			bodyElement.classList.remove('lg:is-home');
-		}
-
-		// increase the page height during page transition to prevent the scrolling animation from jumping
-		const heightExtend = document.getElementById('page-height-extend')
-		if (heightExtend) {
-			heightExtend.classList.remove('hidden')
-		}
-
-		// Hide the TOC while scrolling back to top
-		let toc = document.getElementById('toc-wrapper');
-		if (toc) {
-			toc.classList.add('toc-not-ready')
-		}
-	});
-	window.swup.hooks.on('page:view', () => {
-		// hide the temp high element when the transition is done
-		const heightExtend = document.getElementById('page-height-extend')
-		if (heightExtend) {
-			heightExtend.classList.remove('hidden')
-		}
-	});
-	window.swup.hooks.on('visit:end', (_visit) => {
-		setTimeout(() => {
-			const heightExtend = document.getElementById('page-height-extend')
-			if (heightExtend) {
-				heightExtend.classList.add('hidden')
-			}
-
-            // Just make the transition looks better
-            const toc = document.getElementById('toc-wrapper');
-            if (toc) {
-                toc.classList.remove('toc-not-ready')
-            }
-        }, 200)
-	});
-}
-if (window?.swup?.hooks) {
-	setup()
-} else {
-	document.addEventListener('swup:enable', setup)
-}
-
-let backToTopBtn = document.getElementById('back-to-top-btn');
-let toc = document.getElementById('toc-wrapper');
-let navbar = document.getElementById('navbar-wrapper')
-function scrollFunction() {
-	let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100)
-
-	if (backToTopBtn) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
-			backToTopBtn.classList.remove('hide')
-		} else {
-			backToTopBtn.classList.add('hide')
-		}
-	}
-
-	if (bannerEnabled && toc) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
-			toc.classList.remove('toc-hide')
-		} else {
-			toc.classList.add('toc-hide')
-		}
-	}
-
-	if (!bannerEnabled) return
-	if (navbar) {
-		const NAVBAR_HEIGHT = 72
-		const MAIN_PANEL_EXCESS_HEIGHT = MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16			// The height the main panel overlaps the banner
-
-		let bannerHeight = BANNER_HEIGHT
-		if (document.body.classList.contains('lg:is-home') && window.innerWidth >= 1024) {
-			bannerHeight = BANNER_HEIGHT_HOME
-		}
-		let threshold = window.innerHeight * (bannerHeight / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
-		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
-			navbar.classList.add('navbar-hidden')
-		} else {
-			navbar.classList.remove('navbar-hidden')
-		}
-	}
-}
-window.onscroll = scrollFunction
-
-window.onresize = () => {
-	// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-	let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-	offset = offset - offset % 4;
-	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
-}
-
-// 马克笔动画触发
-const observer = new IntersectionObserver((entries) => {
-	entries.forEach(entry => {
-		if (entry.isIntersecting) {
-			entry.target.classList.add('animate');
-		}
-	});
-}, { threshold: 0.5 }); // 当马克笔文字露出一半时开始涂色
-
-// 页面加载后，观察所有的 mark 标签
-function observeMarkTags() {
-	document.querySelectorAll('mark').forEach(m => observer.observe(m));
-}
-
-// 初始化时观察
-observeMarkTags();
-
-// 页面切换时重新观察
-if (window?.swup?.hooks) {
-	window.swup.hooks.on('page:view', observeMarkTags);
-} else {
-	document.addEventListener('swup:enable', () => {
-		window.swup.hooks.on('page:view', observeMarkTags);
-	});
-}
-
-</script>
-
-<script defer type="module">
-import PhotoSwipeLightbox from "photoswipe/lightbox"
-import "photoswipe/style.css"
-
-let lightbox
-let pswp = import("photoswipe")
-
-function createPhotoSwipe() {
-	lightbox = new PhotoSwipeLightbox({
-		gallery: ".custom-md img, #post-cover img",
-		pswpModule: () => pswp,
-		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
-		zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
-		padding: { top: 20, bottom: 20, left: 20, right: 20 },
-		wheelToZoom: true,
-		arrowPrev: false,
-		arrowNext: false,
-		imageClickAction: 'zoom',
-		tapAction: 'zoom',
-		doubleTapAction: 'zoom',
-	})
-
-	lightbox.addFilter("domItemData", (itemData, element) => {
-		if (element instanceof HTMLImageElement) {
-			itemData.src = element.src
-
-			itemData.w = Number(element.naturalWidth || window.innerWidth)
-			itemData.h = Number(element.naturalHeight || window.innerHeight)
-
-			itemData.msrc = element.src
-		}
-
-		return itemData
-	})
-
-	lightbox.init()
-}
-
-const setupLightbox = () => {
-	if (!lightbox) {
-		createPhotoSwipe()
-	}
-	window.swup.hooks.on("page:view", () => {
-		createPhotoSwipe()
-	})
-
-	window.swup.hooks.on(
-		"content:replace",
-		() => {
-			lightbox?.destroy?.()
-		},
-		{ before: true },
-	)
-}
-
-if (window.swup) {
-	setup()
-	setupLightbox()
-} else {
-	document.addEventListener("swup:enable", setup)
-	document.addEventListener("swup:enable", setupLightbox)
-}
-</script>
+<script defer type="module" src="/src/scripts/overlay-scrollbars.ts"></script>
+<script defer type="module" src="/src/scripts/photoswipe-init.ts"></script>
+<script defer type="module" src="/src/scripts/link-guard.ts"></script>

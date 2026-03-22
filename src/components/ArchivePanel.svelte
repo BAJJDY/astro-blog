@@ -5,14 +5,13 @@ import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import { getPostUrlBySlug } from "../utils/url-utils";
 
-export let tags: string[];
-export let categories: string[];
+export let tags: string[] = [];
+export let categories: string[] = [];
 export let sortedPosts: Post[] = [];
 
-const params = new URLSearchParams(window.location.search);
-tags = params.has("tag") ? params.getAll("tag") : [];
-categories = params.has("category") ? params.getAll("category") : [];
-const uncategorized = params.get("uncategorized");
+let activeTags: string[] = [];
+let activeCategories: string[] = [];
+let uncategorized = false;
 
 interface Post {
 	slug: string;
@@ -40,19 +39,26 @@ function formatDate(date: Date | string) {
 }
 
 onMount(async () => {
+	// Read query params on client only; avoids SSR/runtime errors on archive page.
+	const params = new URLSearchParams(window.location.search);
+	activeTags = params.has("tag") ? params.getAll("tag") : [];
+	activeCategories = params.has("category") ? params.getAll("category") : [];
+	uncategorized = params.get("uncategorized") !== null;
+
 	let filteredPosts: Post[] = sortedPosts;
 
-	if (tags.length > 0) {
+	if (activeTags.length > 0) {
 		filteredPosts = filteredPosts.filter(
 			(post) =>
 				Array.isArray(post.data.tags) &&
-				post.data.tags.some((tag) => tags.includes(tag)),
+				post.data.tags.some((tag) => activeTags.includes(tag)),
 		);
 	}
 
-	if (categories.length > 0) {
+	if (activeCategories.length > 0) {
 		filteredPosts = filteredPosts.filter(
-			(post) => post.data.category && categories.includes(post.data.category),
+			(post) =>
+				post.data.category && activeCategories.includes(post.data.category),
 		);
 	}
 

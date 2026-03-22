@@ -1,4 +1,4 @@
-import type {
+﻿import type {
 	ExpressiveCodeConfig,
 	LicenseConfig,
 	NavBarConfig,
@@ -7,7 +7,7 @@ import type {
 } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "BAJJDY Blog",
+	title: "",
 	subtitle: "个人博客",
 	lang: "zh_CN", // Language code, e.g. 'en', 'zh_CN', 'ja', etc.
 	themeColor: {
@@ -16,7 +16,7 @@ export const siteConfig: SiteConfig = {
 	},
 	banner: {
 		enable: false,
-		src: undefined, // 不使用预加载，避免404错误
+		src: "", // 涓嶄娇鐢ㄩ鍔犺浇锛岄伩鍏?04閿欒
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
 		credit: {
 			enable: false, // Display the credit text of the banner image
@@ -38,7 +38,7 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
 	links: [
 		{
-			name: "主页",
+			name: "首页",
 			url: "/",
 		},
 		{
@@ -49,8 +49,8 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: undefined, // 不使用预加载，避免404错误
-	name: "不爱剪辑的Y",
+	avatar: undefined, // 涓嶄娇鐢ㄩ鍔犺浇锛岄伩鍏?04閿欒
+	name: "bajjdy",
 	bio: "Free as the wind",
 	links: [
 		{
@@ -79,3 +79,4 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 	// Please select a dark theme, as this blog theme currently only supports dark background color
 	theme: "github-dark",
 };
+

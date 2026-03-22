@@ -16,28 +16,32 @@ const className = Astro.props.class;
 <script is:inline>
 document.addEventListener("click", function (e) {
     const target = e.target instanceof Element ? e.target : null;
-    if (target && target.classList.contains("copy-btn")) {
-        const preEle = target.closest("pre");
-        const codeEle = preEle?.querySelector("code");
-        const code = Array.from(codeEle?.querySelectorAll(".code:not(summary *)") ?? [])
-            .map(el => el.textContent)
-            .map(t => t === "\n" ? "" : t)
-            .join("\n");
-        navigator.clipboard.writeText(code);
+    const copyButton = target?.closest(".copy-btn");
+    if (!(copyButton instanceof HTMLElement)) return;
 
-        const timeoutId = target.getAttribute("data-timeout-id");
-        if (timeoutId) {
-            clearTimeout(Number.parseInt(timeoutId, 10));
-        }
+    const preEle = copyButton.closest("pre");
+    const codeEle = preEle?.querySelector("code");
+    const code = Array.from(codeEle?.querySelectorAll(".code:not(summary *)") ?? [])
+        .map(el => el.textContent)
+        .map(t => t === "\n" ? "" : t)
+        .join("\n");
+    navigator.clipboard.writeText(code);
 
-        target.classList.add("success");
-
-        // 设置新的timeout并保存ID到按钮的自定义属性中
-        const newTimeoutId = setTimeout(() => {
-            target.classList.remove("success");
-        }, 1000);
-
-        target.setAttribute("data-timeout-id", newTimeoutId.toString());
+    const timeoutId = copyButton.getAttribute("data-timeout-id");
+    if (timeoutId) {
+        clearTimeout(Number.parseInt(timeoutId, 10));
     }
+
+    copyButton.classList.add("success");
+    const textSpan = copyButton.querySelector(".text");
+    if (textSpan) textSpan.textContent = "Copied";
+
+    const newTimeoutId = setTimeout(() => {
+        copyButton.classList.remove("success");
+        const resetTextSpan = copyButton.querySelector(".text");
+        if (resetTextSpan) resetTextSpan.textContent = "Copy";
+    }, 1000);
+
+    copyButton.setAttribute("data-timeout-id", newTimeoutId.toString());
 });
 </script>

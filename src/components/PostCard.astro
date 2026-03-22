@@ -1,4 +1,4 @@
----
+﻿---
 import type { CollectionEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
 import I18nKey from "../i18n/i18nKey";
@@ -40,7 +40,7 @@ const { remarkPluginFrontmatter } = await entry.render();
 ---
 <div class:list={["card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", className]} style={style}>
     <div class:list={["pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative", {"w-full md:w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
-        <!-- 标题带左侧竖条 -->
+        <!-- 鏍囬甯﹀乏渚х珫鏉?-->
         <a href={url}
            class="transition group w-full block font-bold mb-3 text-3xl text-90
         hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
@@ -54,18 +54,25 @@ const { remarkPluginFrontmatter } = await entry.render();
             <Icon class="text-[var(--primary)] text-[2rem] transition hidden md:inline absolute translate-y-0.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0" name="material-symbols:chevron-right-rounded"></Icon>
         </a>
 
-        <!-- 描述 -->
+        <!-- 鎻忚堪 -->
         <div class:list={["transition text-75 mb-3 pr-4 user-select-none", {"line-clamp-2 md:line-clamp-1": !description}]}>
             { description || remarkPluginFrontmatter.excerpt }
         </div>
 
-        <!-- 底部信息：日期 | 字数 | 阅读时间 -->
-        <div class="text-sm text-black/30 dark:text-white/30 flex flex-wrap gap-2 items-center transition user-select-none">
-            <div class="whitespace-nowrap">{published.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
-            <div class="hidden sm:block">|</div>
-            <div class="whitespace-nowrap">{remarkPluginFrontmatter.words} {i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}</div>
-            <div class="hidden sm:block">|</div>
-            <div class="whitespace-nowrap">{remarkPluginFrontmatter.minutes} {i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}</div>
+        <!-- 搴曢儴淇℃伅锛氭棩鏈?| 瀛楁暟 | 闃呰鏃堕棿 -->
+        <div class="flex flex-wrap gap-2 items-center transition user-select-none text-[0.8rem] md:text-sm text-black/65 dark:text-white/70">
+            <div class="inline-flex items-center rounded-lg px-2 py-1 bg-white/55 dark:bg-black/30 backdrop-blur-sm">
+                <Icon name="material-symbols:calendar-today-outline-rounded" class="text-[0.95rem] mr-1 text-[var(--primary)]"></Icon>
+                <span class="whitespace-nowrap">{published.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
+            </div>
+            <div class="inline-flex items-center rounded-lg px-2 py-1 bg-white/55 dark:bg-black/30 backdrop-blur-sm">
+                <Icon name="material-symbols:notes-rounded" class="text-[0.95rem] mr-1 text-[var(--primary)]"></Icon>
+                <span class="whitespace-nowrap">{remarkPluginFrontmatter.words} {i18n(remarkPluginFrontmatter.words === 1 ? I18nKey.wordCount : I18nKey.wordsCount)}</span>
+            </div>
+            <div class="inline-flex items-center rounded-lg px-2 py-1 bg-white/55 dark:bg-black/30 backdrop-blur-sm">
+                <Icon name="material-symbols:schedule-outline-rounded" class="text-[0.95rem] mr-1 text-[var(--primary)]"></Icon>
+                <span class="whitespace-nowrap">{remarkPluginFrontmatter.minutes} {i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}</span>
+            </div>
         </div>
 
     </div>
@@ -76,12 +83,15 @@ const { remarkPluginFrontmatter } = await entry.render();
                         "md:w-[var(--coverWidth)] relative md:absolute md:top-3 md:bottom-3 md:right-3 rounded-xl overflow-hidden active:scale-95"
                     ]} >
         <div class="absolute pointer-events-none z-10 w-full h-full group-hover:bg-black/30 group-active:bg-black/50 transition"></div>
+        <div class="absolute z-30 top-2 left-2 inline-flex items-center rounded-md px-2 py-1 bg-black/45 text-white/90 backdrop-blur-sm">
+            <Icon name="material-symbols:image-outline-rounded" class="text-[0.95rem]"></Icon>
+        </div>
         <div class="absolute pointer-events-none z-20 w-full h-full flex items-center justify-center ">
             <Icon name="material-symbols:chevron-right-rounded"
                   class="transition opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white text-5xl">
             </Icon>
         </div>
-        <img src={`/post-thumbnails/${image}`} alt="Cover Image of the Post" class="w-full h-full object-cover" />
+        <img src={`/post-thumbnails/${image}`} alt="Cover Image of the Post" class="w-full h-full object-cover object-[center_35%]" draggable="false" />
     </a>}
 
     {!hasCover &&
@@ -99,3 +109,4 @@ const { remarkPluginFrontmatter } = await entry.render();
 
 <style define:vars={{coverWidth}}>
 </style>
+

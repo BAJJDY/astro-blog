@@ -1,4 +1,4 @@
----
+﻿---
 import path from "node:path";
 
 interface Props {
@@ -47,7 +47,7 @@ if (isLocal) {
 const imageClass = "w-full h-full object-cover";
 const imageStyle = `object-position: ${position}`;
 
-// 判断是否为首屏图片（banner 或 profile）
+// Determine whether this image should be loaded with high priority.
 const isPriority =
 	id === "banner" || id === "post-cover" || className?.includes("profile");
 ---
@@ -61,6 +61,7 @@ const isPriority =
         decoding="async"
         format="webp"
         quality={85}
+        draggable={false}
     />}
     {!isLocal && <img 
         src={isPublic ? url(src) : src} 
@@ -70,5 +71,7 @@ const isPriority =
         loading={isPriority ? "eager" : "lazy"} 
         decoding="async"
         fetchpriority={isPriority ? "high" : "auto"}
+        draggable="false"
     />}
 </div>
+

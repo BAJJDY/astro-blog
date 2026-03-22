@@ -4,7 +4,6 @@ import { navBarConfig, siteConfig } from "../config";
 import { LinkPresets } from "../constants/link-presets";
 import { LinkPreset, type NavBarLink } from "../types/config";
 import { url } from "../utils/url-utils";
-import LightDarkSwitch from "./LightDarkSwitch.svelte";
 import DisplaySettings from "./widget/DisplaySettings.svelte";
 import NavMenuPanel from "./widget/NavMenuPanel.astro";
 
@@ -18,247 +17,370 @@ let links: NavBarLink[] = navBarConfig.links.map(
 		return item;
 	},
 );
+
+const getNavIcon = (link: NavBarLink): string => {
+	const raw = (link.url || "").toLowerCase();
+	if (raw === "/" || raw === "") return "material-symbols:home-outline-rounded";
+	if (raw.includes("archive")) return "material-symbols:archive-outline-rounded";
+	if (raw.includes("posts")) return "material-symbols:article-outline-rounded";
+	if (raw.includes("about")) return "material-symbols:person-outline-rounded";
+	return "material-symbols:bookmarks-outline-rounded";
+};
 ---
+
 <div id="navbar" class="navbar-glass-wrapper z-50 onload-animation">
-    <div class="navbar-glass absolute h-8 left-0 right-0 -top-8 transition"></div>
-    <div class:list={[
-        className,
-        "navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4 rounded-[var(--radius-large)]"]}>
-        <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 user-select-none">
-            <div class="flex flex-row text-[var(--primary)] items-center text-md">
-                <Icon name="material-symbols:home-outline-rounded" class="text-[1.75rem] mb-1 mr-2" />
-                {siteConfig.title}
-            </div>
-        </a>
-        <div class="hidden md:flex">
-            {links.map((l) => {
-                return <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
-                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95 user-select-none"
-                >
-                    <div class="flex items-center">
-                        {l.name}
-                        {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
-                    </div>
-                </a>;
-            })}
-        </div>
-        <div class="flex items-center gap-2">
-            <!-- Search button -->
-            <div class="hidden lg:flex">
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 flex items-center w-64">
-                    <Icon name="material-symbols:search" class="text-gray-400 dark:text-gray-500 mr-2"></Icon>
-                    <input type="text" placeholder="搜索" class="bg-transparent border-none outline-none flex-grow text-gray-900 dark:text-gray-100">
-                </div>
-            </div>
-            <!-- Search results panel -->
-            <div id="search-results" class="hidden absolute top-16 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
-                <div id="search-results-content" class="p-4">
-                    <!-- Search results will be displayed here -->
-                </div>
-            </div>
-            <!-- toggle btn for phone/tablet view -->
-            <button aria-label="Search Panel" id="search-switch"
-                    class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90">
-                <Icon name="material-symbols:search" class="text-[1.25rem]"></Icon>
-            </button>
-            {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
-                        <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
-                    </button>
-            )}
-            <div class="flex items-center">
-                <!-- @ts-ignore client:load is an Astro directive -->
-                <LightDarkSwitch client:load></LightDarkSwitch>
-            </div>
-            <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
-                <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
-            </button>
-        </div>
-        <NavMenuPanel links={links}></NavMenuPanel>
-        <!-- @ts-ignore client:load is an Astro directive -->
-        <DisplaySettings client:load></DisplaySettings>
-    </div>
-</div>
+	<div class="navbar-glass absolute h-8 left-0 right-0 -top-8 transition"></div>
+	<div
+		class:list={[
+			className,
+			"navbar-glass !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4 px-2 sm:px-4 rounded-[var(--radius-large)]",
+		]}
+	>
+		<a href={url("/")} class="home-link btn-plain scale-animation rounded-lg w-11 h-11 p-0 font-bold active:scale-95 user-select-none shrink-0" aria-label="Home">
+			<div class="flex h-full w-full text-[var(--primary)] items-center justify-center">
+				<Icon name="material-symbols:home-outline-rounded" class="text-[1.45rem]" />
+			</div>
+		</a>
+
+		<nav class="hidden md:flex items-center justify-center justify-self-center gap-1 text-center">
+			{links.map((l) => {
+				return <a
+					aria-label={l.name}
+					href={l.external ? l.url : url(l.url)}
+					target={l.external ? "_blank" : null}
+					class="btn-plain scale-animation rounded-lg h-11 font-bold px-4 lg:px-5 active:scale-95 user-select-none"
+				>
+					<div class="flex items-center justify-center gap-1.5">
+						<Icon name={getNavIcon(l)} class="text-[1.05rem]"></Icon>
+						{l.name}
+						{l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+					</div>
+				</a>;
+			})}
+		</nav>
+
+			<div class="flex items-center justify-self-end gap-1 sm:gap-2 shrink-0">
+				<div id="navbar-search-bar" class="navbar-search-bar">
+					<Icon name="material-symbols:search" class="navbar-search-icon" />
+					<input
+						id="navbar-search-input"
+						type="text"
+						placeholder="搜索"
+						class="navbar-search-input"
+					/>
+				</div>
+				<button
+					id="navbar-search-switch"
+					aria-label="Search Panel"
+					class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90"
+				>
+					<Icon name="material-symbols:search" class="text-[1.25rem]" />
+				</button>
+
+			{!siteConfig.themeColor.fixed && (
+				<button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
+					<Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
+				</button>
+			)}
+
+				<button
+					id="navbar-theme-toggle"
+					aria-label="Light/Dark Mode"
+					class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90"
+				>
+					<Icon
+						name="material-symbols:dark-mode-outline-rounded"
+						class="text-[1.25rem] dark:hidden"
+					/>
+					<Icon
+						name="material-symbols:wb-sunny-outline-rounded"
+						class="text-[1.25rem] hidden dark:block"
+					/>
+				</button>
+
+			<button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
+				<Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
+			</button>
+		</div>
+
+			<NavMenuPanel links={links}></NavMenuPanel>
+			<DisplaySettings client:only="svelte"></DisplaySettings>
+		</div>
+	</div>
+
+	<div
+		id="navbar-search-panel"
+		class="float-panel float-panel-closed search-panel absolute md:w-[30rem]
+	top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2"
+	>
+		<div
+			id="navbar-search-bar-inside"
+			class="navbar-search-bar navbar-search-bar--mobile"
+		>
+			<Icon name="material-symbols:search" class="navbar-search-icon" />
+			<input
+				id="navbar-search-input-mobile"
+				type="text"
+				placeholder="搜索"
+				class="navbar-search-input"
+			/>
+		</div>
+		<div id="navbar-search-status" class="navbar-search-status"></div>
+		<div id="navbar-search-results" class="navbar-search-results"></div>
+	</div>
 
 <script>
-function switchTheme() {
-    // 直接操作DOM，不使用任何过渡效果
-    const htmlElement = document.documentElement;
-    
-    // 立即执行主题切换，不使用任何动画或过渡
-    if (localStorage.theme === 'dark') {
-        // 直接移除dark类
-        htmlElement.classList.remove('dark');
-        localStorage.theme = 'light';
-    } else {
-        // 直接添加dark类
-        htmlElement.classList.add('dark');
-        localStorage.theme = 'dark';
-    }
-    
-    // 强制浏览器立即重绘，使用最快速的方法
-    // 方法：修改display属性触发重绘
-    htmlElement.style.display = 'block';
-    htmlElement.offsetHeight; // 触发重排
+	function bindNavbarActionDelegation() {
+		const root = document.documentElement;
+		if (root.dataset.navbarActionDelegated === "true") return;
+		root.dataset.navbarActionDelegated = "true";
+
+	document.addEventListener("click", (event) => {
+		const target = event.target;
+		if (!(target instanceof Element)) return;
+
+		if (target.closest("#display-settings-switch")) {
+			const settingPanel = document.getElementById("display-setting");
+			if (settingPanel) {
+				settingPanel.classList.toggle("float-panel-closed");
+			}
+			return;
+		}
+
+		if (target.closest("#nav-menu-switch")) {
+			const menuPanel = document.getElementById("nav-menu-panel");
+			if (menuPanel) {
+				menuPanel.classList.toggle("float-panel-closed");
+			}
+		}
+	});
 }
 
-function loadButtonScript() {
-    let switchBtn = document.getElementById("scheme-switch");
-    if (switchBtn) {
-        switchBtn.onclick = function () {
-            switchTheme()
-        };
-    }
-
-    let settingBtn = document.getElementById("display-settings-switch");
-    if (settingBtn) {
-        settingBtn.onclick = function () {
-            let settingPanel = document.getElementById("display-setting");
-            if (settingPanel) {
-                settingPanel.classList.toggle("float-panel-closed");
-            }
-        };
-    }
-
-    let menuBtn = document.getElementById("nav-menu-switch");
-    if (menuBtn) {
-        menuBtn.onclick = function () {
-            let menuPanel = document.getElementById("nav-menu-panel");
-            if (menuPanel) {
-                menuPanel.classList.toggle("float-panel-closed");
-            }
-        };
-    }
-
-    // Search functionality
-    let searchInput = document.getElementById("search-input");
-    let searchResults = document.getElementById("search-results");
-    let searchResultsContent = document.getElementById("search-results-content");
-    let searchTimeout: any;
-
-    if (searchInput && searchResults && searchResultsContent) {
-        // Show search results panel when input is focused
-        searchInput.addEventListener("focus", function() {
-            if ((this as HTMLInputElement).value.trim() !== "") {
-                searchResults.classList.remove("hidden");
-            }
-        });
-
-        // Hide search results panel when input is blurred
-        searchInput.addEventListener("blur", function() {
-            setTimeout(function() {
-                searchResults.classList.add("hidden");
-            }, 200);
-        });
-
-        // Search functionality on input
-        searchInput.addEventListener("input", function() {
-            const keyword = (this as HTMLInputElement).value.trim();
-            
-            // Clear previous timeout
-            clearTimeout(searchTimeout);
-            
-            if (keyword.length === 0) {
-                searchResults.classList.add("hidden");
-                return;
-            }
-            
-            // Set timeout for debouncing
-            searchTimeout = setTimeout(async function() {
-                try {
-                    // Check if Pagefind is available
-                    if (typeof window.pagefind === "undefined") {
-                        // Use mock data in development mode
-                        searchResultsContent.innerHTML = `
-                            <div class="text-sm text-gray-600 dark:text-gray-300 mb-2">搜索结果 (模拟数据)</div>
-                            <div class="space-y-2">
-                                <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <div class="font-medium">这是一个模拟搜索结果</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">因为搜索在开发环境中无法正常工作</div>
-                                </div>
-                                <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <div class="font-medium">如果你想测试搜索功能</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">请尝试运行 npm run build && npm run preview</div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // Use Pagefind for actual search
-                        const results = await window.pagefind.search(keyword);
-                        
-                        if (results.results.length === 0) {
-                            searchResultsContent.innerHTML = `
-                                <div class="text-sm text-gray-600 dark:text-gray-300">没有找到匹配的结果</div>
-                            `;
-                        } else {
-                            const resultsHtml = results.results.map((result: any) => {
-                                return `
-                                    <div class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                        <a href="${result.url || ''}" class="block">
-                                            <div class="font-medium">${result.title || ''}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">${result.excerpt || ''}</div>
-                                        </a>
-                                    </div>
-                                `;
-                            }).join("");
-                            
-                            searchResultsContent.innerHTML = `
-                                <div class="text-sm text-gray-600 dark:text-gray-300 mb-2">搜索结果</div>
-                                <div class="space-y-2">${resultsHtml}</div>
-                            `;
-                        }
-                    }
-                    
-                    // Show search results panel
-                    searchResults.classList.remove("hidden");
-                } catch (error) {
-                    console.error("Search error:", error);
-                    searchResultsContent.innerHTML = `
-                        <div class="text-sm text-red-600 dark:text-red-400">搜索时出错</div>
-                    `;
-                    searchResults.classList.remove("hidden");
-                }
-            }, 300); // 300ms debounce
-        });
-    }
-}
-
-loadButtonScript();
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", bindNavbarActionDelegation);
+} else {
+	bindNavbarActionDelegation();
+	}
 </script>
 
-{import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>
+<script is:inline>
+(() => {
+	const root = document.documentElement;
+	if (root.dataset.navSearchBound === "true") return;
+	root.dataset.navSearchBound = "true";
+
+	const searchInput = document.getElementById("navbar-search-input");
+	const searchSwitch = document.getElementById("navbar-search-switch");
+	const panel = document.getElementById("navbar-search-panel");
+	const mobileInput = document.getElementById("navbar-search-input-mobile");
+	const statusEl = document.getElementById("navbar-search-status");
+	const resultsEl = document.getElementById("navbar-search-results");
+	const themeToggle = document.getElementById("navbar-theme-toggle");
+
+	let indexLoaded = false;
+	let indexData = [];
+	let searchTimer;
+
+	const escapeHtml = (value) =>
+		value
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;")
+			.replaceAll("'", "&#39;");
+
+	const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+	const getTerms = (keyword) =>
+		Array.from(
+			new Set(
+				keyword
+					.toLowerCase()
+					.split(/\s+/)
+					.map((part) => part.trim())
+					.filter(Boolean),
+			),
+		);
+
+	const highlightText = (text, terms) => {
+		let out = escapeHtml(text);
+		for (const term of terms) {
+			if (!term) continue;
+			const reg = new RegExp(`(${escapeRegExp(term)})`, "gi");
+			out = out.replace(reg, "<mark>$1</mark>");
+		}
+		return out;
+	};
+
+	const ensureIndex = async () => {
+		if (indexLoaded) return;
+		try {
+			const res = await fetch("/api/search-index.json", { cache: "force-cache" });
+			if (!res.ok) throw new Error(`index ${res.status}`);
+			const data = await res.json();
+			indexData = Array.isArray(data) ? data : [];
+		} catch (err) {
+			console.error("Failed to load search index:", err);
+			indexData = [];
+		} finally {
+			indexLoaded = true;
+		}
+	};
+
+	const renderResults = (items, keyword) => {
+		const terms = getTerms(keyword);
+		if (!resultsEl) return;
+		resultsEl.innerHTML = "";
+
+		if (!keyword) {
+			if (statusEl) statusEl.textContent = "";
+			return;
+		}
+
+		const hintSet = new Set(terms);
+		for (const item of items) {
+			const matches = (item.excerpt || "").matchAll(/<mark>(.*?)<\/mark>/gi);
+			for (const match of matches) {
+				const t = (match[1] || "").trim().toLowerCase();
+				if (t) hintSet.add(t);
+			}
+		}
+
+		if (statusEl) {
+			statusEl.textContent =
+				items.length === 0
+					? `未找到相关文章，请尝试其他关键词。`
+					: `关键词“${keyword}”命中 ${hintSet.size} 个提示词，${items.length} 篇文章`;
+		}
+
+		for (const item of items) {
+			const title = escapeHtml(item.title || "");
+			const excerptSource = (item.excerpt || item.content || "").trim();
+			const preview =
+				excerptSource.length > 180
+					? `${excerptSource.slice(0, 180)}...`
+					: excerptSource;
+			const excerpt = highlightText(preview, terms);
+
+			const entry = document.createElement("a");
+			entry.href = item.url || "#";
+			entry.className =
+				"transition first-of-type:mt-2 lg:first-of-type:mt-0 group block " +
+				"rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]";
+
+			entry.innerHTML =
+				`<div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">` +
+				`${title}<span class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]">›</span></div>` +
+				`<div class="transition text-sm text-50">${excerpt}</div>`;
+			resultsEl.appendChild(entry);
+		}
+	};
+
+	const doSearch = async (keyword) => {
+		const normalized = (keyword || "").trim();
+		if (!panel) return;
+		if (!normalized) {
+			renderResults([], "");
+			return;
+		}
+		panel.classList.remove("float-panel-closed");
+		await ensureIndex();
+		const terms = getTerms(normalized);
+		const ranked = [];
+
+		for (const item of indexData) {
+			const haystack = `${item.title} ${item.excerpt} ${item.content}`.toLowerCase();
+			const titleText = (item.title || "").toLowerCase();
+			const matchedTerms = terms.filter((t) => haystack.includes(t));
+			if (matchedTerms.length === 0) continue;
+			const titleMatches = matchedTerms.filter((t) => titleText.includes(t)).length;
+			const score = matchedTerms.length * 8 + titleMatches * 5;
+			ranked.push({ ...item, _score: score });
+		}
+
+		ranked.sort((a, b) => b._score - a._score);
+		renderResults(ranked, normalized);
+	};
+
+	const queueSearch = (value) => {
+		if (searchTimer) clearTimeout(searchTimer);
+		searchTimer = setTimeout(() => {
+			void doSearch(value);
+		}, 180);
+	};
+
+	searchInput?.addEventListener("input", (e) => queueSearch(e.target.value));
+	searchInput?.addEventListener("focus", (e) => queueSearch(e.target.value));
+	mobileInput?.addEventListener("input", (e) => queueSearch(e.target.value));
+
+	searchSwitch?.addEventListener("click", () => {
+		panel?.classList.toggle("float-panel-closed");
+		if (!panel?.classList.contains("float-panel-closed")) {
+			mobileInput?.focus();
+		}
+	});
+
+	resultsEl?.addEventListener("click", (event) => {
+		const target = event.target;
+		if (!(target instanceof Element)) return;
+		if (!target.closest("a")) return;
+		panel?.classList.add("float-panel-closed");
+		if (statusEl) statusEl.textContent = "";
+		if (resultsEl) resultsEl.innerHTML = "";
+	});
+
+	themeToggle?.addEventListener("click", () => {
+		const isDark = root.classList.contains("dark");
+		const next = isDark ? "light" : "dark";
+		localStorage.setItem("theme", next);
+		root.classList.toggle("dark", next === "dark");
+	});
+
+	// Close panel when clicking outside
+	document.addEventListener("click", (event) => {
+		const target = event.target;
+		if (!(target instanceof Element)) return;
+		if (target.closest("#navbar-search-panel")) return;
+		if (target.closest("#navbar-search-switch")) return;
+		if (target.closest("#navbar-search-bar")) return;
+		panel?.classList.add("float-panel-closed");
+	});
+})();
+</script>
+
+{import.meta.env.PROD && <script is:inline define:vars={{ scriptUrl: url("/pagefind/pagefind.js") }}>
 async function loadPagefind() {
-    try {
-        const response = await fetch(scriptUrl, { method: 'HEAD' });
-        if (!response.ok) {
-            throw new Error(`Pagefind script not found: ${response.status}`);
-        }
+	try {
+		const response = await fetch(scriptUrl, { method: "HEAD" });
+		if (!response.ok) {
+			throw new Error(`Pagefind script not found: ${response.status}`);
+		}
 
-        const pagefind = await import(scriptUrl);
+		const pagefind = await import(scriptUrl);
 
-        await pagefind.options({
-            excerptLength: 20
-        });
+		await pagefind.options({
+			excerptLength: 20,
+		});
 
-        window.pagefind = pagefind;
+		window.pagefind = pagefind;
 
-        document.dispatchEvent(new CustomEvent('pagefindready'));
-        console.log('Pagefind loaded and initialized successfully, event dispatched.');
-    } catch (error) {
-        console.error('Failed to load Pagefind:', error);
-        window.pagefind = {
-            search: () => Promise.resolve({ results: [] }),
-            options: () => Promise.resolve(),
-        };
-        document.dispatchEvent(new CustomEvent('pagefindloaderror'));
-        console.log('Pagefind load error, event dispatched.');
-    }
+		document.dispatchEvent(new CustomEvent("pagefindready"));
+		console.log("Pagefind loaded and initialized successfully, event dispatched.");
+	} catch (error) {
+		console.error("Failed to load Pagefind:", error);
+		window.pagefind = {
+			search: () => Promise.resolve({ results: [] }),
+			options: () => Promise.resolve(),
+		};
+		document.dispatchEvent(new CustomEvent("pagefindloaderror"));
+		console.log("Pagefind load error, event dispatched.");
+	}
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadPagefind);
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", loadPagefind);
 } else {
-    loadPagefind();
+	loadPagefind();
 }
 </script>}
 
@@ -266,6 +388,7 @@ if (document.readyState === 'loading') {
   .navbar-glass-wrapper {
     isolation: isolate;
   }
+
   .navbar-glass {
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(12px);
@@ -273,138 +396,100 @@ if (document.readyState === 'loading') {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.5) inset;
   }
+
   :global(.dark) .navbar-glass {
     background: rgba(23, 23, 23, 0.72);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.2) inset;
   }
 
-/* From Uiverse.io by TimTrayler */
-.searchbar {
-  font-size: 14px; 
-  font-family: arial, sans-serif; 
-  color: #202124; 
-  display: flex; 
-  z-index: 3; 
-  height: 44px; 
-  background: white; 
-  border: 1px solid #dfe1e5; 
-  box-shadow: none; 
-  border-radius: 24px; 
-  margin: 0 auto; 
-  width: auto; 
-  max-width: 224px; 
-}
+  .navbar-search-bar {
+    display: flex;
+    align-items: center;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    padding: 0 0.75rem;
+    background: rgba(0, 0, 0, 0.04);
+    transition: background 0.2s ease;
+  }
+  :global(.dark) .navbar-search-bar {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .navbar-search-bar:focus-within {
+    background: rgba(0, 0, 0, 0.06);
+  }
+  :global(.dark) .navbar-search-bar:focus-within {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .navbar-search-icon {
+    font-size: 1.25rem;
+    color: rgba(0, 0, 0, 0.35);
+  }
+  :global(.dark) .navbar-search-icon {
+    color: rgba(255, 255, 255, 0.35);
+  }
+  .navbar-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding-left: 0.5rem;
+    width: 10rem;
+    color: rgba(0, 0, 0, 0.65);
+  }
+  .navbar-search-input:focus {
+    width: 13rem;
+  }
+  :global(.dark) .navbar-search-input {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .navbar-search-bar--mobile {
+    display: none;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  .navbar-search-status {
+    margin-top: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(0, 0, 0, 0.04);
+    font-size: 0.875rem;
+  }
+  :global(.dark) .navbar-search-status {
+    background: rgba(255, 255, 255, 0.06);
+  }
 
-.searchbar:hover { 
-  box-shadow: 0 1px 6px rgb(32 33 36 / 28%); 
-  border-color: rgba(223,225,229,0); 
-}
+  @media (max-width: 767px) {
+    #navbar-search-bar {
+      display: none;
+    }
+    #navbar-search-switch {
+      display: inline-flex;
+    }
+    .navbar-search-bar--mobile {
+      display: flex;
+    }
+    .navbar-search-input {
+      width: 100%;
+    }
+  }
 
-.searchbar-wrapper { 
-  flex: 1; 
-  display: flex; 
-  padding: 5px 8px 0 14px; 
-}
+  @media (min-width: 768px) {
+    #navbar-search-switch {
+      display: none;
+    }
+  }
 
-.searchbar-left { 
-  font-size: 14px; 
-  font-family: arial, sans-serif; 
-  color: #202124; 
-  display: flex; 
-  align-items: center; 
-  padding-right: 13px; 
-  margin-top: -5px; 
-}
+  #navbar-wrapper .home-link {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    min-width: 2.75rem !important;
+    min-height: 2.75rem !important;
+    padding: 0 !important;
+    border-radius: 0.75rem !important;
+  }
 
-.search-icon-wrapper { 
-  margin: auto; 
-}
-
-.search-icon { 
-  margin-top: 3px; 
-  color: #9aa0a6; 
-  height: 20px; 
-  line-height: 20px; 
-  width: 20px; 
-}
-
-.searchbar-icon { 
-  display: inline-block; 
-  fill: currentColor; 
-  height: 24px; 
-  line-height: 24px; 
-  position: relative; 
-  width: 24px; 
-}
-
-.searchbar-center { 
-  display: flex; 
-  flex: 1; 
-  flex-wrap: wrap; 
-}
-
-.searchbar-input-spacer { 
-  color: transparent; 
-  flex: 100%; 
-  white-space: pre; 
-  height: 34px; 
-  font-size: 16px; 
-}
-
-.searchbar-input { 
-  background-color: transparent; 
-  border: none; 
-  margin: 0; 
-  padding: 0; 
-  color: rgba(0, 0, 0, .87); 
-  word-wrap: break-word; 
-  outline: none; 
-  display: flex; 
-  flex: 100%; 
-  margin-top: -37px; 
-  height: 34px; 
-  font-size: 16px; 
-  max-width: 100%; 
-  width: 100%; 
-}
-
-.searchbar-right { 
-  display: flex; 
-  flex: 0 0 auto; 
-  margin-top: -5px; 
-  align-items: stretch; 
-  flex-direction: row 
-}
-
-.searchbar-clear-icon { 
-  margin-right: 12px 
-}
-
-.voice-search { 
-  flex: 1 0 auto; 
-  display: flex; 
-  cursor: pointer; 
-  align-items: center; 
-  border: 0; 
-  background: transparent; 
-  outline: none; 
-  padding: 0 8px; 
-  width: 2.8em; 
-}
-
-/* Dark mode styles */
-.dark .searchbar { 
-  background: #303134 !important; 
-  border: 1px solid #5f6368 !important; 
-  color: #e8eaed !important; 
-}
-
-.dark .searchbar-input { 
-  color: #e8eaed !important; 
-}
-
-.dark .search-icon { 
-  color: #9aa0a6 !important; 
-}
+  #navbar-wrapper .home-link::before {
+    border-radius: 0.75rem !important;
+  }
 </style>

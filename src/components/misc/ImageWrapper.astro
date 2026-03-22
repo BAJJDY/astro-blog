@@ -1,5 +1,4 @@
-﻿---
-import path from "node:path";
+---
 
 interface Props {
 	id?: string;
@@ -32,9 +31,10 @@ if (isLocal) {
 	const files = import.meta.glob<ImageMetadata>("../../**", {
 		import: "default",
 	});
-	let normalizedPath = path
-		.normalize(path.join("../../", basePath, src))
-		.replace(/\\/g, "/");
+	// 手动处理路径，避免使用 node:path
+	let normalizedPath = `../../${basePath.replace(/^\//, '')}/${src}`
+		.replace(/\/+/g, "/") // 移除多余的斜杠
+		.replace(/\\/g, "/"); // 替换反斜杠为斜杠
 	const file = files[normalizedPath];
 	if (!file) {
 		console.error(

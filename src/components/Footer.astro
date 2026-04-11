@@ -1,0 +1,24 @@
+---
+
+import { profileConfig } from "../config";
+import { url } from "../utils/url-utils";
+
+const currentYear = new Date().getFullYear();
+---
+
+<div class="my-8 mx-4 md:mx-8 lg:mx-16">
+    <div class="bg-transparent rounded-lg py-4 px-4 text-black/70 dark:text-white/90 text-xs">
+        <div class="text-center space-y-2">
+            <div class="flex flex-wrap items-center justify-center gap-1">
+                <span>© {currentYear} BAJJDY 保留所有</span>
+                <span>/</span>
+                <a class="text-[var(--primary)] hover:underline" target="_blank" href={url('rss.xml')}>RSS</a>
+                <span>/</span>
+                <a class="text-[var(--primary)] hover:underline" target="_blank" href={url('sitemap-index.xml')}>网站地图</a>
+            </div>
+            <div class="text-black/50 dark:text-white/60">
+                由 <a class="text-[var(--primary)] hover:underline" target="_blank" href="https://astro.build">Astro</a> 和 <a class="text-[var(--primary)] hover:underline" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a> 强力驱动
+            </div>
+        </div>
+    </div>
+</div>

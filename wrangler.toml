@@ -1,0 +1,6 @@
+name = "bajjdy-blog"
+compatibility_date = "2026-04-11"
+
+[site]
+bucket = "dist"
+entry-point = "workers-site"

@@ -22,6 +22,8 @@ export async function getStaticPaths() {
 	}));
 }
 
+export const prerender = true;
+
 const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
 
